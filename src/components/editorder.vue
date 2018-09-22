@@ -1,0 +1,254 @@
+<template>
+  <div class="container">
+    <h1>Заказ № {{orderId}}</h1>
+    <div class="order-head row col-12 mt-2 mb-2">
+      <div class="form-group col-4">
+        <label>Номер заказа:</label>
+        <input type="text" class="form-control" v-model="order.number">
+      </div>
+      <div class="form-group col-4">
+        <label>Дата создания:</label>
+        <input type="text" class="form-control" disabled=true v-model="order.createdAt">
+      </div>
+      <div class="form-group col-4">
+        <label>Статус</label>
+        <input type="text" class="form-control" v-model="order.status" disabled="true">
+      </div>
+      <div class="form-group col-4">
+        <label>Клиент:</label>
+        <input type="text" class="form-control" v-model="order.client">
+      </div>
+      <div class="form-group col-4">
+        <label>Адрес:</label>
+        <input type="text" class="form-control" v-model="order.address">
+      </div>
+      <div class="form-group col-4">
+        <label for="number">Способ доставки:</label>
+        <select class="custom-select" v-model="order.delType">
+          <option v-for="type in delType" :key="type.id">{{type.name}}</option>
+        </select>
+      </div>
+    </div>
+    <hr>
+    <div class="order-body row col-12 mt-4 ">
+      <h4>Список товаров:</h4>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th># п/п</th>
+            <th>Артикул</th>
+            <th>Наименование товара</th>
+            <th>Кол-во</th>
+            <th>На остатке<br>в резерве</th>
+            <th>Цена, грн</th>
+            <th>Сумма, грн</th>
+            <th>Опции</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="align-middle" v-for="(product,index) in products" :key="index">
+            <td class="align-middle">{{index+1}}</td>
+            <td class="align-middle">{{product.product_art}}</td>
+            <td class="product__name align-middle">
+              <search-product @productSelect="getProduct($event, index)" v-if="product.product_name==''"/>{{product.product_name}}</td>
+            <td class="product__orderquant">
+              <input type="text" class="form-control" v-show="showElement" v-model="product.product_orderquant">
+              <span v-show="!showElement">{{product.product_orderquant}}</span>
+            </td>
+            <td class="align-middle">{{getProductQuantity (product.product_id)}} ({{getProductCatch(product.product_id)}}) </td>
+            <td class="product__price">
+              <input type="text" class="form-control" v-show="showElement" v-model="product.product_price"/>
+              <span v-show="!showElement">{{product.product_price}}</span></td>
+            <td class="align-middle">{{totalProduct(product.product_orderquant, product.product_price, index)}}</td>
+            <td class="options">
+              <button class="btn btn-outline-danger" :data-id="index" v-show="showElement" @click="deleteProduct"><i class="far fa-trash-alt" :data-id="index"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="5"></td>
+            <td class="total__text">ИТОГО:</td>
+            <td colspan="2" class="total__price">{{this.totalOrder}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn btn-outline-info" v-show="showElement" @click="addOrderProduct"><i class="fas fa-plus"></i></button>
+    </div>
+    <div class="col-12 mt-5">
+      <button class="btn btn-primary" @click="saveOrder">Сохранить</button>
+      <button class="btn btn-success" v-show="showElement" @click="catchOrder">Сохранить и провести</button>
+      <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus !== 1" @click="cancelCatchOrder">Отменить проведение</button>
+      <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus !== 1" @click="shipOrder">Отгрузить</button>
+      <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus === 1" disabled="disabled">Отгружен</button>
+      <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus === 1" @click="cancelShipOrder">Отменить отгрузку</button>
+    </div>
+  </div>  
+</template>
+<script>
+import axios from 'axios'
+import VueResource from 'vue-resource'
+import moment from 'moment'
+import _ from 'lodash'
+
+export default {
+  name: 'editOrder',
+  props: ['orderId'],
+  data () {
+    return {
+      order: {
+        total: 0
+      },
+      products: [],
+      delType: [],
+      counts: [],
+    }
+  },
+  mounted: function () {
+    this.getOrder();
+  },
+  computed: {
+    showElement () {
+      if (this.order.status === 'Новый') {
+        return true
+      } else {
+        return false
+      }
+    },
+    totalOrder () {
+      return this.products.reduce((acc, el)=>acc+el.product_sum,0)
+    },
+    arrProductId () {
+      let newarr = [];
+      for (let product of this.products) {
+        newarr.push(product.product_id)
+      }  
+      return newarr; 
+    }
+  },
+  methods: {
+    //добавление продуктов с таблицу из выпадающего списка
+    getProduct(id, index) {
+      let newProduct = this.products[index];
+      newProduct.product_id = id.id;
+      newProduct.product_art = id.product_art;
+      newProduct.product_name = id.product_name;
+      newProduct.order_id = this.orderId
+      newProduct.product_price = id.acc_product_prices.find(el=>el.accPriceTypeId==1).price_count;
+
+      axios({
+        method: 'PUT',
+        url: `${this.$store.state.host}/orderproducts/productid/`,
+        data: [id.id]
+      })
+      .then(res=>{
+        newProduct.product_count = res.data.filter(el=>el.documentStatus === 1).reduce((acc,el)=>acc+el.product_count,0)
+        newProduct.product_catch = res.data.filter(el=>el.documentStatus !== 1).reduce((acc,el)=>acc+el.product_count,0)
+      })
+      .catch(err=>console.log(err))
+    },
+    getOrder() {
+      axios.get(`${this.$store.state.host}/orders/id/${this.orderId}`)
+        .then(res=>{
+          this.order = res.data;
+          this.getDeltype();
+          this.getOrderProducts();
+          this.getProductCounts()
+        })
+        .catch(err=>console.log(err))
+    },
+    getDeltype() {
+      axios.get(`${this.$store.state.host}/deliverytypes`)
+        .then(res=>this.delType = res.data)
+        .catch(err=>console.log(err))
+    },
+    getOrderProducts() {
+      axios.get(`${this.$store.state.host}/orderproducts/id/2/${this.orderId}`)
+        .then(res=>{this.products=res.data})
+        .catch(err=>console.log(err))
+    },
+    addOrderProduct (e) {
+      e.preventDefault();
+      this.products.push({
+        product_id: 0,
+        product_art: 0,
+        product_name: '',
+        product_orderquant: 1,
+        product_count: 0,
+        product_price: 0,
+        product_sum: 0,
+        document_type: 2
+      })
+    },
+    deleteProduct (e) {
+      e.preventDefault();
+      this.products.splice(e.target.dataset.id,1)
+    },
+    cancelCatchOrder () {
+      this.order.status = 'Новый'
+      this.products.map(el=>el.product_count=null)
+      axios({
+        method: 'PUT',
+        url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
+        data: this.products
+      })
+        .then(res=>console.log(res))
+       this.saveOrder ();  
+    },
+    catchOrder () {
+      this.products.map(el=>el.product_count=el.product_orderquant*(-1));
+      axios({
+        method: 'PUT',
+        url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
+        data: this.products
+      })
+        .then(res=>console.log(res))
+      this.order.status = 'Проведен';
+      this.saveOrder ();
+    },
+    shipOrder () {
+      this.order.documentStatus = 1;
+      this.products.map(el=>el.documentStatus = 1)
+      this.catchOrder ();
+    },
+    cancelShipOrder () {
+      this.order.documentStatus = '';
+      this.products.map(el=>el.documentStatus = '')
+      this.catchOrder ();
+    },
+    totalProduct (quant, price, index) {
+      return this.products[index].product_sum = quant*price
+    },
+    saveOrder () {
+      this.order.total = this.totalOrder;
+      axios({
+        method: 'PUT',
+        url: `${this.$store.state.host}/orders/id/${this.orderId}`,
+        data : Object.assign({},this.order)
+      })
+        .then(res=> this.getProductCounts())
+        .catch(err=>console.log(err)) 
+    },
+    getProductCounts: _.debounce(function () {
+      axios({
+        method: 'PUT',
+        url: `${this.$store.state.host}/orderproducts/productid/`,
+        data: this.arrProductId
+      })
+      .then(res=>{
+        this.counts = res.data;
+      })
+      .catch(err=>console.log(err))
+    }, 100),
+    getProductQuantity (id) {
+      return this.counts.filter(el=>el.product_id==id && el.documentStatus === 1).reduce((acc, item)=>acc + item.product_count,0)
+    },
+    getProductCatch (id) {
+      return this.counts.filter(el=>el.product_id==id && el.documentStatus !== 1).reduce((acc, item)=>acc + item.product_count,0)*(-1)
+    }
+
+  }   
+}
+</script>
+<style>
+
+
+</style>
