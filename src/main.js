@@ -15,6 +15,9 @@ import addposting from './components/addposting.vue'
 import editposting from './components/editposting.vue'
 import store from './store/store'
 import im_orders from './components/im_orders.vue'
+import npExpressDocument from './components/npExpressDocument.vue'
+import MaskedInput from 'vue-masked-input' 
+import JsonExcel from 'vue-json-excel'
 
 Vue.use(VueResource)
 Vue.use(VueRouter)
@@ -30,7 +33,10 @@ Vue.component('editOrder', editOrder);
 Vue.component('appPostings', postings);
 Vue.component('addPosting', addposting);
 Vue.component('editPosting', editposting);
-Vue.component('imOrder', im_orders)
+Vue.component('imOrder', im_orders);
+Vue.component('npDocument', npExpressDocument);
+Vue.component('MaskedInput', MaskedInput);
+Vue.component('downloadExcel', JsonExcel)
 
 new Vue({
   store,

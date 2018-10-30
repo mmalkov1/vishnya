@@ -14,7 +14,23 @@ let Orders = db.define('acc_orders', {
     type: Sequelize.STRING,
     allowNull: true
   },
-  client: {
+  clientName: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  clientSurname: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  clientSecondName: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  clientPhone: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  clientEmail: {
     type: Sequelize.STRING,
     allowNull: true
   },
@@ -34,6 +50,26 @@ let Orders = db.define('acc_orders', {
     type: Sequelize.INTEGER,
     allowNull: true
   },
+  comment: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  deliveryStatus : {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  sourceOrder : {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  declarationNumber: {
+    type: Sequelize.INTEGER,
+    allowNull: true
+  },
+  declarationRef: {
+    type: Sequelize.STRING,
+    allowNull: true
+  }
 })
 let Postings = db.define('acc_postings', {
   number: {
@@ -170,6 +206,25 @@ let PriceType = db.define('acc_price_type', {
   }
 })
 
+let Users = db.define('acc_users', {
+  login: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  password: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  token: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  role: {
+    type: Sequelize.INTEGER,
+    allowNull: true
+  }
+})
+
 Products.belongsTo(Category);
 Products.belongsTo(ProductStatus);
 Products.hasMany(ProductPrice);
@@ -185,5 +240,6 @@ module.exports = {
   ProductPrice,
   PriceType,
   Category,
+  Users,
   db
 }

@@ -11,6 +11,7 @@ let ordersRouter = require('./modules/ordersRouter');
 let orderProducts = require('./modules/orderProductsRouter');
 let deliveryTypes = require('./modules/deliveryType');
 let postingsRouter = require('./modules/postingsRouter');
+let usersRouter = require('./modules/usersRouter');
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -36,6 +37,7 @@ app.use('/orders', ordersRouter);
 app.use('/orderproducts', orderProducts);
 app.use('/deliverytypes', deliveryTypes);
 app.use('/postings', postingsRouter);
+app.use('/users', usersRouter);
 
 
 app.listen(3012, function() {

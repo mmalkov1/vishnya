@@ -18,12 +18,12 @@ export default {
   },
   methods : {
     getImOrders () {
-      let options = {
+      let option = {
         headers : {
           'Authorization':'Bearer 287a0d6efcece7188675832cc20e57172743b28a'
         }
       }
-      axios.get(`https://my.prom.ua/api/v1/orders/list?limit=100`, options)
+      axios.get(`https://my.prom.ua/api/v1/orders/list?limit=100`, option)
         .then(res=>console.log(res))
         .catch(err=>console.log(err))
     }

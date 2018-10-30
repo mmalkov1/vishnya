@@ -15,11 +15,14 @@
     <table class="table table-striped">
       <thead>
         <tr  @click="sortBy">
-          <th id="id">id</th>
-          <th id="">Номер заказа</th>
+          <th id="id">Номер заказа</th>
           <th id="date">Дата создания</th>
           <th id="client">Клиент</th>
-          <th id="status">Статус</th>
+          <th id="">Комментарии</th>
+          <th id="status">Статус заказа</th>
+          <th id="sourceOrder">Источник</th>
+          <th id="">Способ доставки</th>
+          <th id="deliveryStatus">Статус доставки</th>
           <th id="">Сумма</th>
           <th>Опции</th>
         </tr>
@@ -27,10 +30,17 @@
       <tbody >
         <tr v-for="order in orderedOrder" :key="order.id">
           <td>{{order.id}}</td>
-          <td>{{order.number}}</td>
-          <td>{{order.createdAt}}</td>
-          <td>{{order.client}}</td>
+          <td class="small">{{dateFormat(order.createdAt)}}</td>
+          <td class="client-name">
+            <span>{{order.clientSurname}} {{order.clientName}} </span>
+            <p>{{order.clientPhone}}</p>
+            <small>{{order.clientEmail}}</small>
+          </td>
+          <td>{{order.comment}}</td>
           <td>{{order.status}}</td>
+          <td class="small">{{order.sourceOrder}}</td>
+          <td><small>{{order.delType}}</small></td>
+          <td><small>{{order.deliveryStatus}}</small></td>
           <td>{{order.total}}</td>
           <td><button class="btn btn-primary" @click="$emit('editOrder', order.id)"><i class="far fa-edit"></i></button></td>
         </tr>
@@ -89,11 +99,14 @@ export default {
         return _.slice(_.orderBy(this.orders, this.sort, this.ordered), this.currentPosition, this.lastPosition)
       }        
       else {
-        return _.slice(_.orderBy(_.filter(this.orders, (o)=>{return _.includes(o.number, this.filter) || _.includes(o.client, this.filter) || _.includes(o.status, this.filter)}), this.sort, this.ordered), this.currentPosition, this.lastPosition)
+        return _.slice(_.orderBy(_.filter(this.orders, (o)=>{return _.includes(o.deliveryStatus, this.filter) || _.includes(o.clientName, this.filter) || _.includes(o.clientSurname, this.filter) || _.includes(o.clientPhone, this.filter) || _.includes(o.createdAt, this.filter) || _.includes(o.sourceOrder, this.filter) || _.includes(o.comment, this.filter) || _.includes(o.total, this.filter)}), this.sort, this.ordered), this.currentPosition, this.lastPosition)
       }  
     },
   },
   methods: {
+    dateFormat (dateOrder) {
+      return moment(dateOrder).format('YYYY-MM-DD HH:mm:ss');
+    },
     getOrderList () {
       axios(`${this.$store.state.host}/orders`)
         .then((res)=>this.orders = res.data)
@@ -114,5 +127,10 @@ export default {
 }
 </script>
 <style>
-
+  .client-name {
+    width: 20%
+  }
+  .date-order {
+    font-size: 0.8rem;
+  }
 </style>

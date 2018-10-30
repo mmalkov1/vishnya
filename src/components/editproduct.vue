@@ -96,7 +96,6 @@
       </ul>
       <div class="col-12 row counts" v-if="this.tabName === 'counts'">
         <h5 class="col-12">Всего на остатке: {{this.totalCount}}</h5>
-        <h5  class="col-12">Прибыль: {{this.totalSum}}</h5>
         <table class="table table-bordered">
           <thead>
             <tr>
@@ -105,7 +104,8 @@
               <th>Номер документа</th>
               <th>Дата документа</th>
               <th>Количество</th>
-              <th>Проведено</th>
+              <th>В резерве</th>
+              <th>Отгружено</th>
               <th>Цена</th>
               <th>Сумма</th>
             </tr>
@@ -115,9 +115,10 @@
               <td>{{index+1}}</td>
               <td>{{getDocumentType(count.document_type)}}</td>
               <td><span class="badge badge-success order-number" @click="editDocument(count.document_type, count.order_id)">{{count.order_id}}</span></td>
-              <td>{{count.createdAt}}</td>
+              <td>{{dateFormat(count.createdAt)}}</td>
               <td>{{count.product_orderquant}}</td>
-              <td>{{count.product_count}}</td>
+              <td>{{getReservedCount(count.id)}}</td>
+              <td>{{getShipCount(count.id)}}</td>
               <td>{{count.product_price}}</td>
               <td>{{count.product_sum}}</td>
             </tr>
@@ -174,6 +175,7 @@ import Vue from 'vue'
 import axios from 'axios'
 import VueResource from 'vue-resource'
 import VueRouter from 'vue-router'
+import moment from 'moment'
 
 export default {
   name: 'editProduct',
@@ -194,15 +196,32 @@ export default {
     this.getProductInfo();
   },
   methods: {
+    dateFormat (dateOrder) {
+      return moment(dateOrder).format('YYYY-MM-DD HH:mm:ss');
+    },
+    getReservedCount: function (elementId) {
+      let element = this.counts.find(el => el.id === elementId);
+      if (element.documentStatus !== 1) {
+        return element.product_count
+      } else {
+        return '';
+      }
+    },
+    getShipCount: function (elementId) {
+      let element = this.counts.find(el => el.id === elementId);
+      if (element.documentStatus === 1) {
+        return element.product_count
+      } else {
+        return '';
+      }
+    },
     getProductInfo: function () {
       axios(`${this.$store.state.host}/products/id/${this.productId}`)
         .then((response)=>{
           this.product = response.data;
           this.getCategory ();
           this.getStatus ();
-          this.getPriceType ();
-          console.log(this.product)
-          
+          this.getPriceType ();          
         });
     },
     getCategory () {
@@ -278,9 +297,8 @@ export default {
     getCounts () {
       axios.get(`${this.$store.state.host}/orderproducts/${this.productId}`)
         .then(res=>{
-          this.totalCount = res.data.reduce((acc, el)=>acc+el.product_count, 0);
-          this.totalSum = res.data.reduce((acc, el)=>acc+el.product_count*el.product_price, 0);
           this.counts = res.data
+          this.totalCount = res.data.reduce((acc, el)=>acc+(+this.getShipCount(el.id)), 0);
         })
         .catch(err=>console.log(err))
     },
@@ -309,6 +327,8 @@ export default {
   }
   .order-number {
     cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: normal;
   }
   .counts {
     max-height: 25vh;

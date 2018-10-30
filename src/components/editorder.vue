@@ -1,31 +1,44 @@
 <template>
   <div class="container">
-    <h1>Заказ № {{orderId}}</h1>
+    <div class="header-block">
+      <h1 class="header-text">Заказ № {{orderId}}</h1>
+      <small class="header-status alert" :class="this.classAlert" >{{order.status}}</small>
+    </div>
     <div class="order-head row col-12 mt-2 mb-2">
-      <div class="form-group col-4">
-        <label>Номер заказа:</label>
-        <input type="text" class="form-control" v-model="order.number">
+       <div class="form-group col-8">
+        <label>ФИО клиента:</label>
+        <div class="input-group">
+          <input type="text" class="form-control" v-model="order.clientSurname" placeholder="Фамилия">
+          <input type="text" class="form-control" v-model="order.clientName" placeholder="Имя">
+          <input type="text" class="form-control" v-model="order.clientSecondName" placeholder="Отчество">
+        </div>
       </div>
       <div class="form-group col-4">
+        <label>Телефон/e-mail клиента:</label>
+        <div class="input-group">
+          <masked-input type="text" class="form-control" v-model="order.clientPhone" mask="\+\380111111111" placeholder="Телефон"/>
+          <input type="text" class="form-control" v-model="order.clientEmail" placeholder="E-mail">
+        </div>
+      </div>
+      <div class="form-group col-3">
+        <label>Источник заказа</label>
+        <select class="custom-select" v-model="order.sourceOrder">
+          <option v-for="source in sourceOrder"
+                  :key="'source-' + source.id">{{source.name}}</option>
+        </select>
+      </div>
+      <div class="form-group col-3">
         <label>Дата создания:</label>
         <input type="text" class="form-control" disabled=true v-model="order.createdAt">
       </div>
-      <div class="form-group col-4">
-        <label>Статус</label>
-        <input type="text" class="form-control" v-model="order.status" disabled="true">
-      </div>
-      <div class="form-group col-4">
-        <label>Клиент:</label>
-        <input type="text" class="form-control" v-model="order.client">
-      </div>
-      <div class="form-group col-4">
-        <label>Адрес:</label>
+      <div class="form-group col-3">
+        <label>Адрес доставки:</label>
         <input type="text" class="form-control" v-model="order.address">
       </div>
-      <div class="form-group col-4">
+      <div class="form-group col-3">
         <label for="number">Способ доставки:</label>
         <select class="custom-select" v-model="order.delType">
-          <option v-for="type in delType" :key="type.id">{{type.name}}</option>
+          <option v-for="type in delType" :key="'type-' + type.id">{{type.name}}</option>
         </select>
       </div>
     </div>
@@ -39,14 +52,14 @@
             <th>Артикул</th>
             <th>Наименование товара</th>
             <th>Кол-во</th>
-            <th>На остатке<br>в резерве</th>
+            <th>Остаток<br>резерв</th>
             <th>Цена, грн</th>
             <th>Сумма, грн</th>
             <th>Опции</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="align-middle" v-for="(product,index) in products" :key="index">
+          <tr class="align-middle" v-for="(product,index) in products" :key="'product-' + index">
             <td class="align-middle">{{index+1}}</td>
             <td class="align-middle">{{product.product_art}}</td>
             <td class="product__name align-middle">
@@ -73,26 +86,50 @@
       </table>
       <button class="btn btn-outline-info" v-show="showElement" @click="addOrderProduct"><i class="fas fa-plus"></i></button>
     </div>
-    <div class="col-12 mt-5">
-      <button class="btn btn-primary" @click="saveOrder">Сохранить</button>
-      <button class="btn btn-success" v-show="showElement" @click="catchOrder">Сохранить и провести</button>
-      <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus !== 1" @click="cancelCatchOrder">Отменить проведение</button>
-      <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus !== 1" @click="shipOrder">Отгрузить</button>
-      <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus === 1" disabled="disabled">Отгружен</button>
-      <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus === 1" @click="cancelShipOrder">Отменить отгрузку</button>
+    <div class="col-12 mt-2 form-group">
+      <label for="">Комментарии к заказу:</label>
+      <textarea rows="5" class="form-control" v-model="order.comment"></textarea>
+    </div>
+    <div class="col-12 mt-2 d-flex">
+      <div class="col-6">
+        <button class="btn btn-primary" @click="saveOrder">Сохранить</button>
+        <button class="btn btn-success" v-show="showElement" @click="catchOrder">Сохранить и провести</button>
+        <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus !== 1" @click="cancelCatchOrder">Отменить резерв</button>
+        <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus !== 1" @click="shipOrder">Отгрузить</button>
+        <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus === 1" disabled="disabled">Отгружен</button>
+        <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus === 1" @click="cancelShipOrder">Отменить отгрузку</button>
+      </div>
+      <div class="col-5 row mr-auto" v-show="!showElement && order.documentStatus === 1">
+        <label for="number" class="col-6 text-right p-2">Статус посылки:</label>
+        <select class="custom-select col-6 p-2" v-model="order.deliveryStatus">
+          <option v-for="status in deliveryStatus" :key="'status-' + status.id">{{status.name}}</option>
+        </select>
+      </div>
+      <div class="col" v-show="this.isDeclarationExist()">
+        <span>Декларация: {{this.order.declarationNumber}}</span>
+          <a :href="'https://my.novaposhta.ua/orders/printDocument/orders[]/'+ this.order.declarationRef + '/type/pdf/apiKey/' + this.$store.state.npToken" target="blank">Печать ЭН</a>
+          <a :href="'https://my.novaposhta.ua/orders/printMarkings/orders[]/'+ this.order.declarationRef + '/type/pdf/apiKey/' + this.$store.state.npToken" target="blank">Печать маркеровки</a>
+      </div>
+      <np-document class="col-1" 
+                  :order-data="this.order"
+                  :order-products="this.products"
+                  @addNPDocument="addDeclaration"
+                  v-show="!this.isDeclarationExist() && !showElement && order.documentStatus === 1"
+      ></np-document>
     </div>
   </div>  
 </template>
 <script>
-import axios from 'axios'
-import VueResource from 'vue-resource'
-import moment from 'moment'
-import _ from 'lodash'
+import axios from "axios";
+import VueResource from "vue-resource";
+import moment from "moment";
+import _ from "lodash";
+import MaskedInput from 'vue-masked-input' 
 
 export default {
-  name: 'editOrder',
-  props: ['orderId'],
-  data () {
+  name: "editOrder",
+  props: ["orderId"],
+  data() {
     return {
       order: {
         total: 0
@@ -100,155 +137,288 @@ export default {
       products: [],
       delType: [],
       counts: [],
-    }
+      deliveryStatus: [
+        {
+          id: 1,
+          name: "На складе"
+        },
+        {
+          id: 2,
+          name: "Отправлено"
+        },
+        {
+          id: 3,
+          name: "Получено"
+        },
+        {
+          id: 4,
+          name: "Отказ от получения"
+        }
+      ],
+      sourceOrder: [
+        {
+          id: 1,
+          name: "Vishnya"
+        },
+        {
+          id: 2,
+          name: "Вишня"
+        },
+        {
+          id: 3,
+          name: "Вишня телефон"
+        },
+        {
+          id: 4,
+          name: "Малина"
+        },
+        {
+          id: 5,
+          name: "Малина телефон"
+        },
+        {
+          id: 6,
+          name: "OLX"
+        },
+        {
+          id: 7,
+          name: "Клубок"
+        },
+        {
+          id: 8,
+          name: "SHAFA"
+        },
+        {
+          id: 9,
+          name: "Kidstaff"
+        },
+        {
+          id: 10,
+          name: "Facebook"
+        },
+        {
+          id: 11,
+          name: "Instagramm"
+        },
+        {
+          id: 12,
+          name: "Rozetka"
+        },
+        {
+          id: 13,
+          name: "Дропшипинг"
+        }
+      ]
+    };
   },
-  mounted: function () {
+  mounted: function() {
     this.getOrder();
   },
   computed: {
-    showElement () {
-      if (this.order.status === 'Новый') {
-        return true
-      } else {
-        return false
+    classAlert() {
+      if (this.order.status === "Новый") {
+        return "alert-secondary";
+      } else if (this.order.status === "Зарезервирован") {
+        return "alert-warning";
+      } else if (this.order.status === "Выполнен") {
+        return "alert-success";
       }
     },
-    totalOrder () {
-      return this.products.reduce((acc, el)=>acc+el.product_sum,0)
+    showElement() {
+      if (this.order.status === "Новый") {
+        return true;
+      } else {
+        return false;
+      }
     },
-    arrProductId () {
+    totalOrder() {
+      return this.products.reduce((acc, el) => acc + el.product_sum, 0);
+    },
+    arrProductId() {
       let newarr = [];
       for (let product of this.products) {
-        newarr.push(product.product_id)
-      }  
-      return newarr; 
+        newarr.push(product.product_id);
+      }
+      return newarr;
     }
   },
   methods: {
+    isDeclarationExist() {
+      if (
+        this.order.declarationNumber !== null &&
+        this.order.declarationRef !== null
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    addDeclaration(obj) {
+      this.order.declarationNumber = obj.data[0].IntDocNumber;
+      this.order.declarationRef = obj.data[0].Ref;
+      this.saveOrder();
+    },
     //добавление продуктов с таблицу из выпадающего списка
     getProduct(id, index) {
       let newProduct = this.products[index];
       newProduct.product_id = id.id;
       newProduct.product_art = id.product_art;
       newProduct.product_name = id.product_name;
-      newProduct.order_id = this.orderId
-      newProduct.product_price = id.acc_product_prices.find(el=>el.accPriceTypeId==1).price_count;
+      newProduct.order_id = this.orderId;
+      newProduct.product_price = id.acc_product_prices.find(
+        el => el.accPriceTypeId == 1
+      ).price_count;
 
       axios({
-        method: 'PUT',
+        method: "PUT",
         url: `${this.$store.state.host}/orderproducts/productid/`,
         data: [id.id]
       })
-      .then(res=>{
-        newProduct.product_count = res.data.filter(el=>el.documentStatus === 1).reduce((acc,el)=>acc+el.product_count,0)
-        newProduct.product_catch = res.data.filter(el=>el.documentStatus !== 1).reduce((acc,el)=>acc+el.product_count,0)
-      })
-      .catch(err=>console.log(err))
+        .then(res => {
+          newProduct.product_residue = res.data
+            .filter(el => el.documentStatus === 1)
+            .reduce((acc, el) => acc + el.product_count, 0);
+          newProduct.product_catch = res.data
+            .filter(el => el.documentStatus !== 1)
+            .reduce((acc, el) => acc + el.product_count, 0);
+        })
+        .catch(err => console.log(err));
     },
     getOrder() {
-      axios.get(`${this.$store.state.host}/orders/id/${this.orderId}`)
-        .then(res=>{
+      axios
+        .get(`${this.$store.state.host}/orders/id/${this.orderId}`)
+        .then(res => {
           this.order = res.data;
           this.getDeltype();
           this.getOrderProducts();
-          this.getProductCounts()
+          this.getProductCounts();
         })
-        .catch(err=>console.log(err))
+        .catch(err => console.log(err));
     },
     getDeltype() {
-      axios.get(`${this.$store.state.host}/deliverytypes`)
-        .then(res=>this.delType = res.data)
-        .catch(err=>console.log(err))
+      axios
+        .get(`${this.$store.state.host}/deliverytypes`)
+        .then(res => (this.delType = res.data))
+        .catch(err => console.log(err));
     },
     getOrderProducts() {
-      axios.get(`${this.$store.state.host}/orderproducts/id/2/${this.orderId}`)
-        .then(res=>{this.products=res.data})
-        .catch(err=>console.log(err))
+      axios
+        .get(`${this.$store.state.host}/orderproducts/id/2/${this.orderId}`)
+        .then(res => {
+          this.products = res.data;
+        })
+        .catch(err => console.log(err));
     },
-    addOrderProduct (e) {
+    addOrderProduct(e) {
       e.preventDefault();
       this.products.push({
         product_id: 0,
         product_art: 0,
-        product_name: '',
+        product_name: "",
         product_orderquant: 1,
-        product_count: 0,
+        product_count: null,
         product_price: 0,
         product_sum: 0,
         document_type: 2
-      })
+      });
     },
-    deleteProduct (e) {
+    deleteProduct(e) {
       e.preventDefault();
-      this.products.splice(e.target.dataset.id,1)
+      this.products.splice(e.target.dataset.id, 1);
     },
-    cancelCatchOrder () {
-      this.order.status = 'Новый'
-      this.products.map(el=>el.product_count=null)
+    cancelCatchOrder() {
+      this.order.status = "Новый";
+      this.products.map(el => (el.product_count = null));
       axios({
-        method: 'PUT',
+        method: "PUT",
+        url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
+        data: this.products
+      }).then(res => console.log(res));
+      this.saveOrder();
+    },
+    catchOrder() {
+      this.products.map(el => (el.product_count = el.product_orderquant * -1));
+      this.order.status = "Зарезервирован";
+      axios({
+        method: "PUT",
         url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
         data: this.products
       })
-        .then(res=>console.log(res))
-       this.saveOrder ();  
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+      this.saveOrder();
     },
-    catchOrder () {
-      this.products.map(el=>el.product_count=el.product_orderquant*(-1));
-      axios({
-        method: 'PUT',
-        url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
-        data: this.products
-      })
-        .then(res=>console.log(res))
-      this.order.status = 'Проведен';
-      this.saveOrder ();
-    },
-    shipOrder () {
+    shipOrder() {
       this.order.documentStatus = 1;
-      this.products.map(el=>el.documentStatus = 1)
-      this.catchOrder ();
+      this.order.status = "Выполнен";
+      this.products.map(el => (el.documentStatus = 1));
+      axios({
+        method: "PUT",
+        url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
+        data: this.products
+      })
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+      this.saveOrder();
     },
-    cancelShipOrder () {
-      this.order.documentStatus = '';
-      this.products.map(el=>el.documentStatus = '')
-      this.catchOrder ();
+    cancelShipOrder() {
+      this.order.documentStatus = "";
+      this.order.status = "Зарезервирован";
+      this.products.map(el => (el.documentStatus = ""));
+      axios({
+        method: "PUT",
+        url: `${this.$store.state.host}/orderproducts/id/2/${this.orderId}`,
+        data: this.products
+      })
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+      this.saveOrder();
     },
-    totalProduct (quant, price, index) {
-      return this.products[index].product_sum = quant*price
+    totalProduct(quant, price, index) {
+      return (this.products[index].product_sum = quant * price);
     },
-    saveOrder () {
+    saveOrder() {
       this.order.total = this.totalOrder;
       axios({
-        method: 'PUT',
+        method: "PUT",
         url: `${this.$store.state.host}/orders/id/${this.orderId}`,
-        data : Object.assign({},this.order)
+        data: Object.assign({}, this.order)
       })
-        .then(res=> this.getProductCounts())
-        .catch(err=>console.log(err)) 
+        .then(res => this.getProductCounts())
+        .catch(err => console.log(err));
     },
-    getProductCounts: _.debounce(function () {
+    getProductCounts: _.debounce(function() {
       axios({
-        method: 'PUT',
+        method: "PUT",
         url: `${this.$store.state.host}/orderproducts/productid/`,
         data: this.arrProductId
       })
-      .then(res=>{
-        this.counts = res.data;
-      })
-      .catch(err=>console.log(err))
+        .then(res => {
+          this.counts = res.data;
+        })
+        .catch(err => console.log(err));
     }, 100),
-    getProductQuantity (id) {
-      return this.counts.filter(el=>el.product_id==id && el.documentStatus === 1).reduce((acc, item)=>acc + item.product_count,0)
+    getProductQuantity(id) {
+      return this.counts
+        .filter(el => el.product_id == id && el.documentStatus === 1)
+        .reduce((acc, item) => acc + item.product_count, 0);
     },
-    getProductCatch (id) {
-      return this.counts.filter(el=>el.product_id==id && el.documentStatus !== 1).reduce((acc, item)=>acc + item.product_count,0)*(-1)
+    getProductCatch(id) {
+      return this.counts
+        .filter(el => el.product_id == id && el.documentStatus !== 1)
+        .reduce((acc, item) => acc + +item.product_count, 0);
     }
-
-  }   
-}
+  },
+};
 </script>
 <style>
-
-
+.header-status {
+  display: inline-block;
+  padding: 0.15rem 1rem;
+  margin-left: 1rem;
+  vertical-align: middle;
+}
+.header-text {
+  display: inline;
+}
 </style>

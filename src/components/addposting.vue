@@ -121,8 +121,7 @@ export default {
         data: [id.id]
       })
       .then(res=>{
-        console.log(res);
-        newProduct.product_count = res.data.reduce((acc,el)=>acc+el.product_count,0)
+        newProduct.product_residue = res.data.reduce((acc,el)=>acc+el.product_count,0)
       })
       .catch(err=>console.log(err))
 
