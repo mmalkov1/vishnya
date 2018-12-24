@@ -1,35 +1,51 @@
 <template>
   <div class="container">
+    <loader v-if="this.isLoaded === true"></loader>
     <div class="header-block">
       <h1 class="header-text">Заказ № {{orderId}}</h1>
-      <small class="header-status alert" :class="this.classAlert" >{{order.status}}</small>
+      <small class="header-status alert" :class="this.classAlert">{{order.status}}</small>
     </div>
     <div class="order-head row col-12 mt-2 mb-2">
-       <div class="form-group col-8">
+      <div class="form-group col-8">
         <label>ФИО клиента:</label>
         <div class="input-group">
-          <input type="text" class="form-control" v-model="order.clientSurname" placeholder="Фамилия">
+          <input
+            type="text"
+            class="form-control"
+            v-model="order.clientSurname"
+            placeholder="Фамилия"
+          >
           <input type="text" class="form-control" v-model="order.clientName" placeholder="Имя">
-          <input type="text" class="form-control" v-model="order.clientSecondName" placeholder="Отчество">
+          <input
+            type="text"
+            class="form-control"
+            v-model="order.clientSecondName"
+            placeholder="Отчество"
+          >
         </div>
       </div>
       <div class="form-group col-4">
         <label>Телефон/e-mail клиента:</label>
         <div class="input-group">
-          <masked-input type="text" class="form-control" v-model="order.clientPhone" mask="\+\380111111111" placeholder="Телефон"/>
+          <masked-input
+            type="text"
+            class="form-control"
+            v-model="order.clientPhone"
+            mask="\+\380111111111"
+            placeholder="Телефон"
+          />
           <input type="text" class="form-control" v-model="order.clientEmail" placeholder="E-mail">
         </div>
       </div>
       <div class="form-group col-3">
         <label>Источник заказа</label>
         <select class="custom-select" v-model="order.sourceOrder">
-          <option v-for="source in sourceOrder"
-                  :key="'source-' + source.id">{{source.name}}</option>
+          <option v-for="source in sourceOrder" :key="'source-' + source.id">{{source.name}}</option>
         </select>
       </div>
       <div class="form-group col-3">
         <label>Дата создания:</label>
-        <input type="text" class="form-control" disabled=true v-model="order.createdAt">
+        <input type="text" class="form-control" disabled="true" v-model="order.createdAt">
       </div>
       <div class="form-group col-3">
         <label>Адрес доставки:</label>
@@ -43,7 +59,7 @@
       </div>
     </div>
     <hr>
-    <div class="order-body row col-12 mt-4 ">
+    <div class="order-body row col-12 mt-4">
       <h4>Список товаров:</h4>
       <table class="table table-striped">
         <thead>
@@ -52,7 +68,9 @@
             <th>Артикул</th>
             <th>Наименование товара</th>
             <th>Кол-во</th>
-            <th>Остаток<br>резерв</th>
+            <th>Остаток
+              <br>резерв
+            </th>
             <th>Цена, грн</th>
             <th>Сумма, грн</th>
             <th>Опции</th>
@@ -63,18 +81,45 @@
             <td class="align-middle">{{index+1}}</td>
             <td class="align-middle">{{product.product_art}}</td>
             <td class="product__name align-middle">
-              <search-product @productSelect="getProduct($event, index)" v-if="product.product_name==''"/>{{product.product_name}}</td>
+              <search-product
+                @productSelect="getProduct($event, index)"
+                v-if="product.product_name==''"
+              />
+              {{product.product_name}}
+            </td>
             <td class="product__orderquant">
-              <input type="text" class="form-control" v-show="showElement" v-model="product.product_orderquant">
+              <input
+                type="text"
+                class="form-control"
+                v-show="showElement"
+                v-model="product.product_orderquant"
+              >
               <span v-show="!showElement">{{product.product_orderquant}}</span>
             </td>
-            <td class="align-middle">{{getProductQuantity (product.product_id)}} ({{getProductCatch(product.product_id)}}) </td>
+            <td
+              class="align-middle"
+            >{{getProductQuantity (product.product_id)}} ({{getProductCatch(product.product_id)}})</td>
             <td class="product__price">
-              <input type="text" class="form-control" v-show="showElement" v-model="product.product_price"/>
-              <span v-show="!showElement">{{product.product_price}}</span></td>
-            <td class="align-middle">{{totalProduct(product.product_orderquant, product.product_price, index)}}</td>
+              <input
+                type="text"
+                class="form-control"
+                v-show="showElement"
+                v-model="product.product_price"
+              >
+              <span v-show="!showElement">{{product.product_price}}</span>
+            </td>
+            <td
+              class="align-middle"
+            >{{totalProduct(product.product_orderquant, product.product_price, index)}}</td>
             <td class="options">
-              <button class="btn btn-outline-danger" :data-id="index" v-show="showElement" @click="deleteProduct"><i class="far fa-trash-alt" :data-id="index"></i></button>
+              <button
+                class="btn btn-outline-danger"
+                :data-id="index"
+                v-show="showElement"
+                @click="deleteProduct"
+              >
+                <i class="far fa-trash-alt" :data-id="index"></i>
+              </button>
             </td>
           </tr>
           <tr>
@@ -84,20 +129,42 @@
           </tr>
         </tbody>
       </table>
-      <button class="btn btn-outline-info" v-show="showElement" @click="addOrderProduct"><i class="fas fa-plus"></i></button>
+      <button class="btn btn-outline-info" v-show="showElement" @click="addOrderProduct">
+        <i class="fas fa-plus"></i>
+      </button>
     </div>
     <div class="col-12 mt-2 form-group">
-      <label for="">Комментарии к заказу:</label>
+      <label for>Комментарии к заказу:</label>
       <textarea rows="5" class="form-control" v-model="order.comment"></textarea>
     </div>
     <div class="col-12 mt-2 d-flex">
       <div class="col-6">
         <button class="btn btn-primary" @click="saveOrder">Сохранить</button>
-        <button class="btn btn-success" v-show="showElement" @click="catchOrder">Сохранить и провести</button>
-        <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus !== 1" @click="cancelCatchOrder">Отменить резерв</button>
-        <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus !== 1" @click="shipOrder">Отгрузить</button>
-        <button class="btn btn-outline-success" v-show="!showElement && order.documentStatus === 1" disabled="disabled">Отгружен</button>
-        <button class="btn btn-outline-danger" v-show="!showElement && order.documentStatus === 1" @click="cancelShipOrder">Отменить отгрузку</button>
+        <button
+          class="btn btn-success"
+          v-show="showElement"
+          @click="catchOrder"
+        >Сохранить и провести</button>
+        <button
+          class="btn btn-outline-danger"
+          v-show="!showElement && order.documentStatus !== 1"
+          @click="cancelCatchOrder"
+        >Отменить резерв</button>
+        <button
+          class="btn btn-outline-success"
+          v-show="!showElement && order.documentStatus !== 1"
+          @click="shipOrder"
+        >Отгрузить</button>
+        <button
+          class="btn btn-outline-success"
+          v-show="!showElement && order.documentStatus === 1"
+          disabled="disabled"
+        >Отгружен</button>
+        <button
+          class="btn btn-outline-danger"
+          v-show="!showElement && order.documentStatus === 1"
+          @click="cancelShipOrder"
+        >Отменить отгрузку</button>
       </div>
       <div class="col-5 row mr-auto" v-show="!showElement && order.documentStatus === 1">
         <label for="number" class="col-6 text-right p-2">Статус посылки:</label>
@@ -107,24 +174,31 @@
       </div>
       <div class="col" v-show="this.isDeclarationExist()">
         <span>Декларация: {{this.order.declarationNumber}}</span>
-          <a :href="'https://my.novaposhta.ua/orders/printDocument/orders[]/'+ this.order.declarationRef + '/type/pdf/apiKey/' + this.$store.state.npToken" target="blank">Печать ЭН</a>
-          <a :href="'https://my.novaposhta.ua/orders/printMarkings/orders[]/'+ this.order.declarationRef + '/type/pdf/apiKey/' + this.$store.state.npToken" target="blank">Печать маркеровки</a>
+        <a
+          :href="'https://my.novaposhta.ua/orders/printDocument/orders[]/'+ this.order.declarationRef + '/type/pdf/apiKey/' + this.$store.state.npToken"
+          target="blank"
+        >Печать ЭН</a>
+        <a
+          :href="'https://my.novaposhta.ua/orders/printMarkings/orders[]/'+ this.order.declarationRef + '/type/pdf/apiKey/' + this.$store.state.npToken"
+          target="blank"
+        >Печать маркеровки</a>
       </div>
-      <np-document class="col-1" 
-                  :order-data="this.order"
-                  :order-products="this.products"
-                  @addNPDocument="addDeclaration"
-                  v-show="!this.isDeclarationExist() && !showElement && order.documentStatus === 1"
+      <np-document
+        class="col-1"
+        :order-data="this.order"
+        :order-products="this.products"
+        @addNPDocument="addDeclaration"
+        v-show="!this.isDeclarationExist() && !showElement && order.documentStatus === 1"
       ></np-document>
     </div>
-  </div>  
+  </div>
 </template>
 <script>
 import axios from "axios";
 import VueResource from "vue-resource";
 import moment from "moment";
 import _ from "lodash";
-import MaskedInput from 'vue-masked-input' 
+import MaskedInput from "vue-masked-input";
 
 export default {
   name: "editOrder",
@@ -134,6 +208,7 @@ export default {
       order: {
         total: 0
       },
+      isLoaded: false,
       products: [],
       delType: [],
       counts: [],
@@ -212,6 +287,7 @@ export default {
     };
   },
   mounted: function() {
+    this.isLoaded = true;
     this.getOrder();
   },
   computed: {
@@ -281,6 +357,7 @@ export default {
           newProduct.product_catch = res.data
             .filter(el => el.documentStatus !== 1)
             .reduce((acc, el) => acc + el.product_count, 0);
+          this.getProductCounts();
         })
         .catch(err => console.log(err));
     },
@@ -306,6 +383,7 @@ export default {
         .get(`${this.$store.state.host}/orderproducts/id/2/${this.orderId}`)
         .then(res => {
           this.products = res.data;
+          this.isLoaded = false;
         })
         .catch(err => console.log(err));
     },
@@ -408,7 +486,7 @@ export default {
         .filter(el => el.product_id == id && el.documentStatus !== 1)
         .reduce((acc, item) => acc + +item.product_count, 0);
     }
-  },
+  }
 };
 </script>
 <style>

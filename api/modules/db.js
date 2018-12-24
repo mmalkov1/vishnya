@@ -1,11 +1,11 @@
-let Sequelize = require('sequelize')
+let Sequelize = require("sequelize");
 
-let db = new Sequelize('vishny00_acc', 'vishny00_acc', 'xbv2juuf', {
-  host: 'vishny00.mysql.tools',
-  dialect: 'mysql'
+let db = new Sequelize("vishny00_acc", "vishny00_acc", "xbv2juuf", {
+  host: "vishny00.mysql.tools",
+  dialect: "mysql"
 });
 
-let Orders = db.define('acc_orders', {
+let Orders = db.define("acc_orders", {
   number: {
     type: Sequelize.STRING,
     allowNull: true
@@ -54,11 +54,11 @@ let Orders = db.define('acc_orders', {
     type: Sequelize.STRING,
     allowNull: true
   },
-  deliveryStatus : {
+  deliveryStatus: {
     type: Sequelize.STRING,
     allowNull: true
   },
-  sourceOrder : {
+  sourceOrder: {
     type: Sequelize.STRING,
     allowNull: true
   },
@@ -70,8 +70,8 @@ let Orders = db.define('acc_orders', {
     type: Sequelize.STRING,
     allowNull: true
   }
-})
-let Postings = db.define('acc_postings', {
+});
+let Postings = db.define("acc_postings", {
   number: {
     type: Sequelize.STRING,
     allowNull: true
@@ -91,16 +91,16 @@ let Postings = db.define('acc_postings', {
   documentStatus: {
     type: Sequelize.INTEGER,
     allowNull: true
-  },
-})
-let DeliveryType = db.define('acc_delivery_type', {
+  }
+});
+let DeliveryType = db.define("acc_delivery_type", {
   name: {
     type: Sequelize.STRING,
     allowNull: true
-  } 
-})
+  }
+});
 
-let OrderProducts = db.define('acc_orderproducts', {
+let OrderProducts = db.define("acc_orderproducts", {
   product_id: {
     type: Sequelize.INTEGER,
     allowNull: true
@@ -125,15 +125,15 @@ let OrderProducts = db.define('acc_orderproducts', {
     type: Sequelize.FLOAT,
     allowNull: true
   },
-  product_orderquant : {
+  product_orderquant: {
     type: Sequelize.INTEGER,
     allowNull: true
   },
-  order_id : {
+  order_id: {
     type: Sequelize.INTEGER,
     allowNull: true
   },
-  document_type : {
+  document_type: {
     type: Sequelize.INTEGER,
     allowNull: true
   },
@@ -141,72 +141,72 @@ let OrderProducts = db.define('acc_orderproducts', {
     type: Sequelize.INTEGER,
     allowNull: true
   }
-})
+});
 
-let Products = db.define('acc_products',{
+let Products = db.define("acc_products", {
   product_name: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: true
   },
   product_art: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: true
   },
-  product_url : {
+  product_url: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: true
   },
-  product_descr : {
+  product_descr: {
     type: Sequelize.TEXT,
-    allowNull: true,
+    allowNull: true
   },
   product_unit: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: true
   },
   product_const: {
     type: Sequelize.DOUBLE,
-    allowNull: true,
+    allowNull: true
   },
   product_photo: {
     type: Sequelize.STRING,
-    allowNull: true,
-  },
-})
+    allowNull: true
+  }
+});
 
-let Category = db.define('acc_category',{
+let Category = db.define("acc_category", {
   category_name: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: true
   },
   parent_id: {
     type: Sequelize.INTEGER,
-    allowNull: true,
+    allowNull: true
   }
-})  
+});
 
-let ProductStatus = db.define('acc_product_status', {
+let ProductStatus = db.define("acc_product_status", {
   name: {
     type: Sequelize.STRING,
-    allowNull: true,
+    allowNull: true
   }
-})
+});
 
-let ProductPrice = db.define('acc_product_price', {
+let ProductPrice = db.define("acc_product_price", {
   price_count: {
     type: Sequelize.FLOAT,
     allowNull: true
   }
-})
+});
 
-let PriceType = db.define('acc_price_type', {
+let PriceType = db.define("acc_price_type", {
   price_name: {
     type: Sequelize.STRING,
     allowNull: true
   }
-})
+});
 
-let Users = db.define('acc_users', {
+let Users = db.define("acc_users", {
   login: {
     type: Sequelize.STRING,
     allowNull: true
@@ -223,8 +223,9 @@ let Users = db.define('acc_users', {
     type: Sequelize.INTEGER,
     allowNull: true
   }
-})
+});
 
+Orders.hasMany(OrderProducts, { foreignKey: "order_id" });
 Products.belongsTo(Category);
 Products.belongsTo(ProductStatus);
 Products.hasMany(ProductPrice);
@@ -242,4 +243,4 @@ module.exports = {
   Category,
   Users,
   db
-}
+};

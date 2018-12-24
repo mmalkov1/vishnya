@@ -1,223 +1,250 @@
 <template>
-<div>
-  <div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{orderData.id}}</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body container">
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Способ доставки</label>
-              <select name="" id="" class="custom-select">
-                <option value="">Новая почта</option>
-              </select>
-            </div>
+  <div>
+    <div
+      class="modal"
+      id="exampleModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{orderData.id}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
           </div>
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Плательщик</label>
-              <select class="custom-select" v-model="payerType">
-                <option value="Recipient">Получатель</option>
-                <option value="Sender">Отправитель</option>
-              </select>
+          <div class="modal-body container">
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Способ доставки</label>
+                <select name id class="custom-select">
+                  <option value>Новая почта</option>
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="form-group col-6">
-              <label for="">Фамилия</label>
-              <input class="form-control" v-model="orderData.clientSurname">
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Плательщик</label>
+                <select class="custom-select" v-model="payerType">
+                  <option value="Recipient">Получатель</option>
+                  <option value="Sender">Отправитель</option>
+                </select>
+              </div>
             </div>
-            <div class="form-group col-6">
-              <label for="">Имя</label>
-              <input class="form-control" v-model="orderData.clientName">
+            <div class="row">
+              <div class="form-group col-6">
+                <label for>Фамилия</label>
+                <input class="form-control" v-model="orderData.clientSurname">
+              </div>
+              <div class="form-group col-6">
+                <label for>Имя</label>
+                <input class="form-control" v-model="orderData.clientName">
+              </div>
             </div>
-          </div>
-          <div class="row">
-             <div class="form-group col-6">
-              <label for="">Отчество</label>
-              <input class="form-control" v-model="orderData.clientSecondName">
+            <div class="row">
+              <div class="form-group col-6">
+                <label for>Отчество</label>
+                <input class="form-control" v-model="orderData.clientSecondName">
+              </div>
+              <div class="form-group col-6">
+                <label for>Телефон</label>
+                <masked-input
+                  class="form-control"
+                  v-model="orderData.clientPhone"
+                  mask="\+\380111111111"
+                />
+              </div>
             </div>
-            <div class="form-group col-6">
-              <label for="">Телефон</label>
-              <masked-input class="form-control" v-model="orderData.clientPhone" mask="\+\380111111111"/>
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Способ получения</label>
+                <select class="custom-select" v-model="serviceType">
+                  <option value="WarehouseWarehouse">В отделении</option>
+                  <option value="WarehouseDoors">По адресу</option>
+                </select>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Способ получения</label>
-              <select class="custom-select" v-model="serviceType">
-                <option value="WarehouseWarehouse">В отделении</option>
-                <option value="WarehouseDoors">По адресу</option>
-              </select>
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Город</label>
+                <model-select
+                  class="custom-select selectpicker"
+                  :options="cities"
+                  v-model="item"
+                  placeholder="select item"
+                ></model-select>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Город</label>
-              <model-select class="custom-select selectpicker" 
-                            :options="cities"
-                            v-model="item"
-                            placeholder="select item">                
-              </model-select>
-              
+            <div class="row" v-show="!this.isServiceType()">
+              <div class="form-group col-6">
+                <label for>Улица</label>
+                <!-- <input class="form-control" v-model="orderData.address"> -->
+                <model-select
+                  class="custom-select selectpicker"
+                  :options="streets"
+                  v-model="itemStreet"
+                  placeholder="select item"
+                ></model-select>
+              </div>
+              <div class="form-group col-6">
+                <label for>Номер дома</label>
+                <input class="form-control" v-model="house">
+              </div>
+              <div class="form-group col-6">
+                <label for>Квартира</label>
+                <input class="form-control" v-model="flat">
+              </div>
             </div>
-          </div>
-          <div class="row" v-show="!this.isServiceType()">
-             <div class="form-group col-6">
-              <label for="">Улица</label>
-              <!-- <input class="form-control" v-model="orderData.address"> -->
-              <model-select class="custom-select selectpicker" 
-                            :options="streets"
-                            v-model="itemStreet"
-                            placeholder="select item">                
-              </model-select>
-            </div>
-            <div class="form-group col-6">
-              <label for="">Номер дома</label>
-              <input class="form-control" v-model="house">
-            </div>
-            <div class="form-group col-6">
-              <label for="">Квартира</label>
-              <input class="form-control" v-model="flat">
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group col-12" v-show="this.isServiceType()">
-              <label for="">Отделение получения</label>
-              <select class="custom-select" v-model="recipientWarehouse">
+            <div class="row">
+              <div class="form-group col-12" v-show="this.isServiceType()">
+                <label for>Отделение получения</label>
+                <model-select
+                  class="custom-select selectpicker"
+                  :options="warehouses"
+                  v-model="recipientWarehouseRef"
+                  placeholder="select item"
+                ></model-select>
+                <!-- <select class="custom-select" v-model="recipientWarehouse">
                 <option v-for="Warehouse of this.warehouses" :key="Warehouse.Ref" :val="Warehouse.Ref">{{Warehouse.text}}</option>
-              </select>
+                </select>-->
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Место отправки</label>
+                <select name id class="custom-select">
+                  <option
+                    value="16922821-e1c2-11e3-8c4a-0050568002cf"
+                  >Отделение №78 (до 30 кг): ул. Магнитогорская, 1а (Дарынок)</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Тип посылки</label>
+                <select class="custom-select" v-model="cargoTypes">
+                  <option value="Parcel">Посылка</option>
+                  <option value="Cargo">Груз</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group col-6">
+                <label for>Номер упаковки (необяз.)</label>
+                <input class="form-control">
+              </div>
+              <div class="form-group col-6">
+                <label for>Объявленная стоимость</label>
+                <input class="form-control" v-model="orderData.total">
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group col-6">
+                <label for>Дата отправки</label>
+                <datepicker v-model="dateSend" :format="customFormatter"></datepicker>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group col-12">
+                <label for>Доп. информация</label>
+                <textarea class="form-control" rows="3" v-model="description"></textarea>
+              </div>
+            </div>
+            <div class="row col-12 mb-2">
+              <div class="custom-control custom-checkbox">
+                <input
+                  type="checkbox"
+                  class="custom-control-input"
+                  id="customCheck1"
+                  v-model="backwardDelivery"
+                >
+                <label class="custom-control-label" for="customCheck1">Заказать обратную доставку</label>
+              </div>
+            </div>
+            <div class="row" v-show="backwardDelivery">
+              <div class="form-group col-12">
+                <label for>Плательщик при обратной доставке</label>
+                <select class="custom-select" v-model="backwardPayerType">
+                  <option value="Recipient">Получатель</option>
+                  <option value="Sender">Отправитель</option>
+                </select>
+              </div>
+            </div>
+            <div class="row" v-show="backwardDelivery">
+              <div class="form-group col-12">
+                <label for>Тип посылки обратной доставки</label>
+                <select class="custom-select" v-model="backwardTypeCargo">
+                  <option value="Documents">Документы</option>
+                  <option value="Money">Деньги</option>
+                </select>
+              </div>
+            </div>
+            <div class="row" v-show="backwardDelivery && !this.isBackwardTypeCargo()">
+              <div class="form-group col-6">
+                <label for>Сумма обратной доставки</label>
+                <input class="form-control" v-model="backwardSum">
+              </div>
+            </div>
+            <div class="row" v-show="backwardDelivery && !this.isBackwardTypeCargo()">
+              <div class="form-group col-12">
+                <label for>Стоимость обратной доставки: {{backwardPay}}грн</label>
+              </div>
+            </div>
+            <div class="row" v-show="backwardDelivery && this.isBackwardTypeCargo()">
+              <div class="form-group col-12">
+                <label for>Описание обратной доставки</label>
+                <input type="text" class="form-control">
+              </div>
+            </div>
+            <div
+              class="row"
+              v-for="(dimension, index) of this.dimensions"
+              :key="'dimension-'+index"
+            >
+              <div class="form-group col-3">
+                <label for>Вес, кг</label>
+                <input class="form-control" v-model="dimension.weight">
+              </div>
+              <div class="form-group col-3">
+                <label for>Длина, см</label>
+                <input class="form-control" v-model="dimension.long">
+              </div>
+              <div class="form-group col-3">
+                <label for>Ширина, см</label>
+                <input class="form-control" v-model="dimension.width">
+              </div>
+              <div class="form-group col-3">
+                <label for>Высота, см</label>
+                <input class="form-control" v-model="dimension.height">
+              </div>
+            </div>
+            <div class="col-12 row">
+              <label class="col-4" for>Объемный вес</label>
+              <input class="form-control col-2" disabled="disabled" v-model="volumeWeight">
+            </div>
+            <div class="row col-12">
+              <a href="#" @click="addPlace()">+ Добавить место</a>
+            </div>
+            <div class="col-12">
+              <ul class v-for="(errorForm, index) of this.errors" :key="'error'+index">
+                <li class="alert alert-danger">{{errorForm}}</li>
+              </ul>
             </div>
           </div>
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Место отправки</label>
-              <select name="" id="" class="custom-select">
-                <option value="16922821-e1c2-11e3-8c4a-0050568002cf">
-                  Отделение №78 (до 30 кг): ул. Магнитогорская, 1а (Дарынок)
-                </option>
-              </select>
-            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @click="addDocument()">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
           </div>
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Тип посылки</label>
-              <select class="custom-select" v-model="cargoTypes">
-                <option  value="Parcel">Посылка</option>
-                <option  value="Cargo">Груз</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-             <div class="form-group col-6">
-              <label for="">Номер упаковки (необяз.)</label>
-              <input class="form-control">
-            </div>
-            <div class="form-group col-6">
-              <label for="">Объявленная стоимость</label>
-              <input class="form-control" v-model="orderData.total">
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group col-6">
-              <label for="">Дата отправки</label>
-              <datepicker v-model="dateSend" :format="customFormatter"></datepicker>
-            </div>
-          </div>
-          <div class="row">
-            <div class="form-group col-12">
-              <label for="">Доп. информация</label>
-              <textarea class="form-control" rows="3" v-model="description"></textarea>
-            </div>
-          </div>
-          <div class="row col-12 mb-2">
-            <div class="custom-control custom-checkbox">
-              <input type="checkbox" class="custom-control-input" id="customCheck1" v-model="backwardDelivery">
-              <label class="custom-control-label" for="customCheck1">Заказать обратную доставку</label>
-            </div>
-          </div>
-          <div class="row" v-show="backwardDelivery">
-            <div class="form-group col-12">
-              <label for="">Плательщик при обратной доставке</label>
-              <select class="custom-select" v-model="backwardPayerType">
-                <option value="Recipient">Получатель</option>
-                <option value="Sender">Отправитель</option>
-              </select>
-            </div>
-          </div>
-          <div class="row"  v-show="backwardDelivery">
-            <div class="form-group col-12">
-              <label for="">Тип посылки обратной доставки</label>
-              <select class="custom-select" v-model="backwardTypeCargo">
-                <option value="Documents">Документы</option>
-                <option value="Money">Деньги</option>
-              </select>
-            </div>
-          </div>
-          <div class="row" v-show="backwardDelivery && !this.isBackwardTypeCargo()">
-            <div class="form-group col-6">
-              <label for="">Сумма обратной доставки</label>
-              <input class="form-control" v-model="backwardSum">
-            </div>
-          </div>
-          <div class="row"  v-show="backwardDelivery && !this.isBackwardTypeCargo()">
-            <div class="form-group col-12">
-              <label for="">Стоимость обратной доставки: {{backwardPay}}грн</label>
-            </div>
-          </div>
-          <div class="row" v-show="backwardDelivery && this.isBackwardTypeCargo()">
-            <div class="form-group col-12">
-              <label for="">Описание обратной доставки</label>
-              <input type="text" class="form-control">
-            </div>
-          </div>
-          <div class="row" v-for="(dimension, index) of this.dimensions" :key="'dimension-'+index">
-            <div class="form-group col-3">
-              <label for="">Вес, кг</label>
-              <input class="form-control" v-model="dimension.weight">
-            </div>
-            <div class="form-group col-3">
-              <label for="">Длина, см</label>
-              <input class="form-control" v-model="dimension.long">
-            </div>
-            <div class="form-group col-3">
-              <label for="">Ширина, см</label>
-              <input class="form-control" v-model="dimension.width">
-            </div>
-            <div class="form-group col-3">
-              <label for="">Высота, см</label>
-              <input class="form-control" v-model="dimension.height">
-            </div>
-          </div>
-          <div class="col-12 row">
-            <label class="col-4" for="">Объемный вес</label>
-            <input class="form-control col-2" disabled="disabled" v-model="volumeWeight">
-          </div>
-          <div class="row col-12">
-            <a href="#" @click="addPlace()">+ Добавить место</a>
-          </div>
-          <div class="col-12">
-            <ul class="" v-for="(errorForm, index) of this.errors" :key="'error'+index">
-              <li class="alert alert-danger">{{errorForm}}</li>
-            </ul>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" @click="addDocument()">Save changes</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+      <i class="far fa-file-alt"></i>
+    </button>
   </div>
-  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-    <i class="far fa-file-alt"></i>
-  </button>
-</div>
 </template>
 <script>
 import axios from "axios";
@@ -249,6 +276,10 @@ export default {
       recipientWarehouseRef: "",
       warehouses: [],
       item: {
+        value: "",
+        text: ""
+      },
+      warehouses1: {
         value: "",
         text: ""
       },
@@ -316,7 +347,7 @@ export default {
   },
   methods: {
     toggleModal() {
-        this.modalShown = !this.modalShown;
+      this.modalShown = !this.modalShown;
     },
     validateForm() {
       this.errors = [];
@@ -335,7 +366,10 @@ export default {
       if (this.item.text === "") {
         this.errors.push('Не заполнено поле "Город"');
       }
-      if (this.serviceType === "WarehouseDoors" && this.itemStreet.text === "") {
+      if (
+        this.serviceType === "WarehouseDoors" &&
+        this.itemStreet.text === ""
+      ) {
         this.errors.push('Не заполнено поле "Адрес"');
       }
       if (this.serviceType === "WarehouseDoors" && this.house === "") {
@@ -344,10 +378,10 @@ export default {
       if (this.serviceType === "WarehouseDoors" && this.house === "") {
         this.errors.push('Не заполнено поле "Квартира"');
       }
-      if (this.serviceType === "WarehouseWarehouse" && this.recipientWarehouse === "") {
-        this.errors.push('Не заполнено поле "Отделение"');
-      }
-      if(this.description === "") {
+      // if (this.serviceType === "WarehouseWarehouse" && this.recipientWarehouseRef === "") {
+      //   this.errors.push('Не заполнено поле "Отделение"');
+      // }
+      if (this.description === "") {
         this.errors.push('Не заполнено поле "Доп.информация"');
       }
     },
@@ -415,7 +449,7 @@ export default {
         for (let obj of res.data.data) {
           this.warehouses.push({
             value: obj.Ref,
-            text: `${obj.Description}`
+            text: `${obj.DescriptionRu}`
           });
         }
       });
@@ -433,7 +467,7 @@ export default {
         for (let obj of res.data.data) {
           this.cities.push({
             value: obj.Ref,
-            text: `${obj.SettlementTypeDescription} ${obj.Description}`
+            text: `${obj.SettlementTypeDescriptionRu} ${obj.DescriptionRu}`
           });
         }
       });
@@ -578,7 +612,7 @@ export default {
                 .then(res => {
                   console.log(res.data);
                   if (this.errors.length === 0) {
-                    $('.modal').modal('hide');
+                    $(".modal").modal("hide");
                     this.$emit("addNPDocument", res.data);
                   }
                 })
@@ -587,7 +621,7 @@ export default {
           )
           .catch(err => console.log(err));
       } else {
-        console.log(this.errors.length)
+        console.log(this.errors.length);
       }
     }
   },

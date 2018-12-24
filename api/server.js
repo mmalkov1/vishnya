@@ -19,11 +19,12 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.use(function(req, res, next) {
+  res.header("Origin", "*");
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Method", "OPTIONS, POST, PUT, GET, HEAD, BODY");
   res.header("Access-Control-Allow-Methods", "OPTIONS, POST, PUT, GET, HEAD, BODY");
   res.header("Allow", "OPTIONS, POST, PUT, GET, HEAD, BODY");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, x-auth-token");
   next();
   
 });

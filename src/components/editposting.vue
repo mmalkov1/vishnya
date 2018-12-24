@@ -48,8 +48,8 @@
             <td class="align-middle">{{getProductQuantity (product.product_id)}} ({{getProductCatch (product.product_id)}})</td>
             <td class="product__price">
               <input type="text" class="form-control" v-show="showElement" v-model="product.product_price"/>
-              <span v-show="!showElement">{{product.product_price}}</span></td>
-            <td class="align-middle">{{totalProduct(product.product_orderquant, product.product_price, index)}}</td>
+              <span v-show="!showElement">{{isShownValue(product.product_price)}}</span></td>
+            <td class="align-middle">{{isShownValue(totalProduct(product.product_orderquant, product.product_price, index))}}</td>
             <td class="options">
               <button class="btn btn-outline-danger" :data-id="index" v-show="showElement" @click="deleteProduct"><i class="far fa-trash-alt" :data-id="index"></i></button>
             </td>
@@ -64,7 +64,7 @@
       <button class="btn btn-outline-info" v-show="showElement" @click="addPostingProduct"><i class="fas fa-plus"></i></button>
     </div>
     <div class="col-12 mt-5">
-      <button class="btn btn-primary" @click="savePosting">Сохранить</button>
+      <button class="btn btn-primary" v-show="showElement" @click="savePosting">Сохранить</button>
       <button class="btn btn-success" v-show="showElement" @click="catchPosting">Сохранить и провести</button>
       <button class="btn btn-danger" v-show="!showElement" @click="cancelCatchPosting">Отменить проведение</button>
     </div>
@@ -111,6 +111,14 @@ export default {
     }
   },
   methods: {
+    //проверка на права пользователя
+    isShownValue (value) {
+      if (this.$store.state.role === 1) {
+        return value
+      } else {
+        return '';
+      }
+    },
     //добавление продуктов с таблицу из выпадающего списка
     getProduct(id, index) {
       let newProduct = this.products[index];
@@ -160,7 +168,7 @@ export default {
         product_price: 0,
         product_sum: 0,
         documentStatus: 0,
-        document_type: 2
+        document_type: 1
       })
     },
     deleteProduct (e) {
@@ -191,7 +199,14 @@ export default {
       })
         .then(res=>console.log(res))
       this.posting.status = 'Проведен';
-      this.savePosting ();
+      this.posting.total = this.totalPosting;
+      axios({
+        method: 'PUT',
+        url: `${this.$store.state.host}/postings/id/${this.postingId}`,
+        data : Object.assign({},this.posting)
+      })
+        .then(res=> console.log(res))
+        .catch(err=>console.log(err))
     },
     totalProduct (quant, price, index) {
       return this.products[index].product_sum = quant*price
@@ -203,13 +218,24 @@ export default {
         url: `${this.$store.state.host}/postings/id/${this.postingId}`,
         data : Object.assign({},this.posting)
       })
-        .then(res=> this.getProductCounts())
+        .then(res=> {
+          this.getProductCounts()
+          this.products.map(el=>el.product_count=0);
+          this.products.map(el=>el.documentStatus=0);
+          this.posting.documentStatus = 1;
+          axios({
+            method: 'PUT',
+            url: `${this.$store.state.host}/orderproducts/id/1/${this.postingId}`,
+            data: this.products
+          })
+            .then(result=>console.log(result))
+        })
         .catch(err=>console.log(err)) 
     },
     getProductCounts: _.debounce(function () {
       axios({
         method: 'PUT',
-        url: `${this.$store.state.host}/orderproducts/productid/`,
+        url: `${this.$store.state.host}/orderproducts/productid/`, 
         data: this.arrProductId
       })
       .then(res=>{

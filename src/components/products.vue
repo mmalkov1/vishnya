@@ -1,35 +1,55 @@
 <template>
-
-  <div id="table" class="container">
-    <div class="row col-12 mt-3">
-      <div class="form-group col-6 row">
-        <label for="find" class="col-3" >Поиск</label>
-        <input v-model="filter" class="form-control col-9" name="find">
-      </div>
-      <div class="form-group col-5  ml-auto row">
-        <select v-model="priceType.count" class="custom-select col-5">
-          <option v-for="type in priceTypes"
-                  :key="type.id"
-                  :value="type.id"
-          >{{type.price_name}}</option>
-        </select>
-        <div class="col-5  ml-auto">
-          <button  class="btn btn-success"  @click="$emit('addProduct')">Добавить</button>
+  <div id="table" class="container" v-if=" this.$store.state.userAuth === true">
+    <loader v-if="this.isLoaded === true"></loader>
+    <div class="row col-12 mt-3 justify-content-between">
+      <div class="form-group col-4 row">
+        <div>
+          <button class="btn btn-success" @click="$emit('addProduct')">Добавить</button>
         </div>
+        <select
+          v-model="priceType.count"
+          class="custom-select col-5 ml-auto"
+          v-if=" this.$store.state.role === 1"
+        >
+          <option v-for="type in priceTypes" :key="type.id" :value="type.id">{{type.price_name}}</option>
+        </select>
+      </div>
+      <div class="form-group col-4 row">
+        <label for="find" class="col-3 align-self-center">Поиск</label>
+        <input v-model="filter" class="form-control col-7" name="find">
+      </div>
+      <div class="form-group col-4 row" v-if="this.$store.state.role === 1">
+        <datepicker
+          :format="format"
+          :language="ru"
+          input-class="form-control col-12"
+          class="col-5"
+          v-model="startDate"
+          :bootstrap-styling="true"
+          :monday-first="true"
+        ></datepicker>
+        <datepicker
+          :format="format"
+          :language="ru"
+          input-class="form-control col-12"
+          class="col-5"
+          v-model="endDate"
+          :bootstrap-styling="true"
+          :monday-first="true"
+        ></datepicker>
         <div class="col-2">
           <download-excel
-            :data   = "productData"
-            :fields = "exportXlsFields"
+            :fetch="getLastOrderDate()"
+            :data="productData"
+            :fields="exportXlsFields"
             class="btn btn-primary btn-sm"
           >
             <i class="fas fa-cloud-download-alt"></i>
-            
           </download-excel>
-
         </div>
       </div>
-    </div> 
-    
+    </div>
+
     <table class="table table-striped">
       <thead>
         <tr @click="sortBy">
@@ -43,7 +63,7 @@
           <th>Опции</th>
         </tr>
       </thead>
-      <tbody >
+      <tbody>
         <tr v-for="product in orderedProducts" :key="'product' + product.id">
           <td>{{ product.id }}</td>
           <td>{{ product.product_art }}</td>
@@ -52,10 +72,14 @@
           <td>{{ getProductQuantity(product.id)}} ({{ getProductReserved(product.id) }})</td>
           <td>{{ priceCount(product.acc_product_prices)}}</td>
           <td>{{ product.product_descr }}</td>
-          <td><button class="btn btn-primary" @click="$emit('editProduct', product.id)"><i class="far fa-edit"></i></button></td>
+          <td>
+            <button class="btn btn-primary" @click="$emit('editProduct', product.id)">
+              <i class="far fa-edit"></i>
+            </button>
+          </td>
         </tr>
       </tbody>
-    </table> 
+    </table>
     <paginate
       v-model="page"
       :page-count="this.pageCount"
@@ -70,10 +94,9 @@
       :next-link-class="'page-link'"
       :page-link-class="'page-link'"
       :container-class="'pagination justify-content-center'"
-      :page-class="'page-item'">
-    </paginate>
+      :page-class="'page-item'"
+    ></paginate>
   </div>
-  
 </template>
 
 <script>
@@ -81,16 +104,22 @@ import axios from "axios";
 import _ from "lodash";
 import "babel-polyfill";
 import moment from "moment";
-import { setTimeout } from 'timers';
+import { setTimeout } from "timers";
+import { ru } from "vuejs-datepicker/dist/locale";
 
 export default {
   name: "productList",
   data() {
     return {
+      isLoaded: false,
+      ru: ru,
       productData: [],
+      startDate: new Date(),
+      endDate: new Date(),
+      format: "dd.MM.yy",
       priceType: {
         default: 1,
-        count: 1
+        count: 2
       },
       productCount: [],
       orderProducts: [],
@@ -152,7 +181,9 @@ export default {
                 el =>
                   el.product_id === value &&
                   el.documentStatus === 1 &&
-                  el.document_type === 2
+                  el.document_type === 2 &&
+                  moment(el.createdAt).isSameOrAfter(this.startDate) &&
+                  moment(el.createdAt).isSameOrBefore(this.endDate)
               )
               .reduce((acc, item) => acc + item.product_count, 0);
             if (res === 0) {
@@ -170,7 +201,9 @@ export default {
                 el =>
                   el.product_id === value &&
                   el.documentStatus === 1 &&
-                  el.document_type === 2
+                  el.document_type === 2 &&
+                  moment(el.createdAt).isSameOrAfter(this.startDate) &&
+                  moment(el.createdAt).isSameOrBefore(this.endDate)
               )
               .reduce((acc, item) => acc + item.product_sum, 0);
             if (res === 0) {
@@ -192,7 +225,9 @@ export default {
                 el =>
                   el.product_id === value &&
                   el.documentStatus === 1 &&
-                  el.document_type === 2
+                  el.document_type === 2 &&
+                  moment(el.createdAt).isSameOrAfter(this.startDate) &&
+                  moment(el.createdAt).isSameOrBefore(this.endDate)
               )
               .reduce((acc, item) => acc + item.product_count * resPrice, 0);
             let resSumSale = this.orderProducts
@@ -200,7 +235,9 @@ export default {
                 el =>
                   el.product_id === value &&
                   el.documentStatus === 1 &&
-                  el.document_type === 2
+                  el.document_type === 2 &&
+                  moment(el.createdAt).isSameOrAfter(this.startDate) &&
+                  moment(el.createdAt).isSameOrBefore(this.endDate)
               )
               .reduce((acc, item) => acc + item.product_sum, 0);
             let res = resSumSale - resSumBuy * -1;
@@ -219,7 +256,9 @@ export default {
                 el =>
                   el.product_id === value &&
                   el.documentStatus === 1 &&
-                  el.document_type === 2
+                  el.document_type === 2 &&
+                  moment(el.createdAt).isSameOrAfter(this.startDate) &&
+                  moment(el.createdAt).isSameOrBefore(this.endDate)
               )
               .reduce(
                 (prev, curr) =>
@@ -277,15 +316,15 @@ export default {
       let newArr1 = [];
       this.orderedProducts.reduce((acc, el) => newArr1.push(el.id), []);
       return newArr1;
-    },
+    }
   },
   created() {
+    this.isLoaded = true;
     this.getAnswer();
     this.getPriceType();
   },
-  
+
   methods: {
-    
     getLastOrderDate: function() {
       axios
         .get(`${this.$store.state.host}/orderproducts`)
@@ -302,7 +341,7 @@ export default {
     sortBy(e) {
       if (this.sort === e.target.id) {
         this.ordered = this.orderArr.filter(el => el != this.ordered);
-       // this.getProductCount();
+        // this.getProductCount();
       } else {
         this.sort = e.target.id;
         //this.getProductCount();
@@ -311,7 +350,7 @@ export default {
     getPage(e) {
       this.currentPosition = (e - 1) * 10;
       this.lastPosition = this.currentPosition + 10;
-     // this.getProductCount();
+      // this.getProductCount();
     },
     getPriceType() {
       axios(`${this.$store.state.host}/productpricetype`).then(
@@ -336,9 +375,13 @@ export default {
         let response = await axios.get(`${this.$store.state.host}/products`);
         this.totalProducts = response.data.length;
         this.productData = response.data;
-        await this.productData.map(el=>{el.product_quant = 0; el.product_reserved = 0});
+        await this.productData.map(el => {
+          el.product_quant = 0;
+          el.product_reserved = 0;
+        });
         await this.productData.map(el => (el.lastSaleDate = ""));
-        await this.getLastOrderDate();
+        //await this.getLastOrderDate();
+        this.isLoaded = false;
       } catch (error) {
         console.log(error);
       }
@@ -356,28 +399,26 @@ export default {
         })
         .catch(err => console.log(err));
     },
-    
+
     getProductQuantity(id) {
-        let res = this.productCount
-          .filter(el => el.product_id == id)
-          .reduce((acc, item) => acc + item.product_count, 0); 
-          console.log('test')      
-        return res;
+      let res = this.productCount
+        .filter(el => el.product_id == id)
+        .reduce((acc, item) => acc + item.product_count, 0);
+      return res;
     },
 
     getProductReserved(id) {
-        let res = this.reserved
-          .filter(el => el.product_id == id)
-          .reduce((acc, item) => acc + item.product_count, 0); 
-          console.log('test')      
-        return res;
-    },
+      let res = this.reserved
+        .filter(el => el.product_id == id)
+        .reduce((acc, item) => acc + item.product_count, 0);
+      return res;
+    }
   },
   watch: {
     idArr: function() {
       this.getProductCount();
     }
-  },
+  }
 };
 </script>
 <style>
