@@ -1,109 +1,115 @@
 <template>
-  <div class="container">
-    <loader v-if="this.isLoaded === true"></loader>
-    <h1>Список заказов</h1>
-    <div class="col-12 mt-3 row">
-      <div class="col-2">
-        <button class="btn btn-success" @click="$emit('addOrder')">Добавить</button>
-      </div>
+  <div>
+    <appHeader/>
+    <div class="container">
+      <loader v-if="this.isLoaded === true"></loader>
+      <h1>Список заказов</h1>
+      <div class="col-12 mt-3 row">
+        <div class="col-2">
+          <router-link class="btn btn-success" to="/orders/add">Добавить</router-link>
+        </div>
 
-      <div class="form-group col-4 row">
-        <label for="find" class="col-3 mr-1">Поиск</label>
-        <input class="form-control col-8" name="find" v-model="filter">
-      </div>
+        <div class="form-group col-4 row">
+          <label for="find" class="col-3 mr-1">Поиск</label>
+          <input class="form-control col-8" name="find" v-model="filter">
+        </div>
 
-      <div class="form-group col-6 row justify-content-end" v-if="this.$store.state.role === 1">
-        <datepicker
-          :format="format"
-          :language="ru"
-          input-class="form-control col-12"
-          class="col-3"
-          v-model="startDate"
-          :bootstrap-styling="true"
-          :monday-first="true"
-        ></datepicker>
-        <datepicker
-          :format="format"
-          :language="ru"
-          input-class="form-control col-12"
-          class="col-3"
-          v-model="endDate"
-          :bootstrap-styling="true"
-          :monday-first="true"
-        ></datepicker>
-        <div class="col-2 d-flex justify-content-end align-items-baseline">
-          <download-excel
-            :data="filterDateOrders(orders)"
-            :fields="exportXlsFields"
-            class="btn btn-primary btn-sm"
-          >
-            <i class="fas fa-cloud-download-alt"></i>
-          </download-excel>
+        <div class="form-group col-6 row justify-content-end" v-if="this.$store.state.role === 1">
+          <datepicker
+            :format="format"
+            :language="ru"
+            input-class="form-control col-12"
+            class="col-3"
+            v-model="startDate"
+            :bootstrap-styling="true"
+            :monday-first="true"
+          ></datepicker>
+          <datepicker
+            :format="format"
+            :language="ru"
+            input-class="form-control col-12"
+            class="col-3"
+            v-model="endDate"
+            :bootstrap-styling="true"
+            :monday-first="true"
+          ></datepicker>
+          <div class="col-2 d-flex justify-content-end align-items-baseline">
+            <download-excel
+              :data="filterDateOrders(orders)"
+              :fields="exportXlsFields"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fas fa-cloud-download-alt"></i>
+            </download-excel>
+          </div>
         </div>
       </div>
+      <table class="table table-striped">
+        <thead>
+          <tr @click="sortBy">
+            <th id="id">Номер заказа</th>
+            <th id="date">Дата создания</th>
+            <th id>Товар</th>
+            <th id="client">Клиент</th>
+            <th id>Комментарии</th>
+            <th id="status">Статус заказа</th>
+            <th id="sourceOrder">Источник</th>
+            <th id>Способ доставки</th>
+            <th id="deliveryStatus">Статус доставки</th>
+            <th id>Сумма</th>
+            <th>Опции</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="order in orderedOrder" :key="order.id">
+            <td>{{order.id}}</td>
+            <td class="small">{{dateFormat(order.createdAt)}}</td>
+            <td
+              class="small"
+            >{{getProductName(order.acc_orderproducts)}} (арт. {{order.acc_orderproducts[0].product_art}})</td>
+            <td class="client-name">
+              <span>{{order.clientSurname}} {{order.clientName}}</span>
+              <p>{{order.clientPhone}}</p>
+              <small>{{order.clientEmail}}</small>
+            </td>
+            <td>{{order.comment}}</td>
+            <td>{{order.status}}</td>
+            <td class="small">{{order.sourceOrder}}</td>
+            <td>
+              <small>{{order.delType}}</small>
+            </td>
+            <td>
+              <small>{{order.deliveryStatus}}</small>
+            </td>
+            <td>{{order.total}}</td>
+            <td>
+              <router-link
+                class="btn btn-outline-dark"
+                :to="{name: 'orders', params: { id: order.id}}"
+              >
+                <i class="far fa-edit"></i>
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <paginate
+        v-model="page"
+        :page-count="this.pageCount"
+        :click-handler="getPage"
+        :page-range="3"
+        :margin-pages="2"
+        :prev-text="'Назад'"
+        :prev-class="'page-item'"
+        :next-text="'Вперед'"
+        :next-class="'page-item'"
+        :prev-link-class="'page-link'"
+        :next-link-class="'page-link'"
+        :page-link-class="'page-link'"
+        :container-class="'pagination justify-content-center'"
+        :page-class="'page-item'"
+      ></paginate>
     </div>
-    <table class="table table-striped">
-      <thead>
-        <tr @click="sortBy">
-          <th id="id">Номер заказа</th>
-          <th id="date">Дата создания</th>
-          <th id>Товар</th>
-          <th id="client">Клиент</th>
-          <th id>Комментарии</th>
-          <th id="status">Статус заказа</th>
-          <th id="sourceOrder">Источник</th>
-          <th id>Способ доставки</th>
-          <th id="deliveryStatus">Статус доставки</th>
-          <th id>Сумма</th>
-          <th>Опции</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="order in orderedOrder" :key="order.id">
-          <td>{{order.id}}</td>
-          <td class="small">{{dateFormat(order.createdAt)}}</td>
-          <td
-            class="small"
-          >{{getProductName(order.acc_orderproducts)}} (арт. {{order.acc_orderproducts[0].product_art}})</td>
-          <td class="client-name">
-            <span>{{order.clientSurname}} {{order.clientName}}</span>
-            <p>{{order.clientPhone}}</p>
-            <small>{{order.clientEmail}}</small>
-          </td>
-          <td>{{order.comment}}</td>
-          <td>{{order.status}}</td>
-          <td class="small">{{order.sourceOrder}}</td>
-          <td>
-            <small>{{order.delType}}</small>
-          </td>
-          <td>
-            <small>{{order.deliveryStatus}}</small>
-          </td>
-          <td>{{order.total}}</td>
-          <td>
-            <button class="btn btn-primary" @click="$emit('editOrder', order.id)">
-              <i class="far fa-edit"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <paginate
-      v-model="page"
-      :page-count="this.pageCount"
-      :click-handler="getPage"
-      :page-range="3"
-      :margin-pages="2"
-      :prev-text="'Назад'"
-      :prev-class="'page-item'"
-      :next-text="'Вперед'"
-      :next-class="'page-item'"
-      :prev-link-class="'page-link'"
-      :next-link-class="'page-link'"
-      :page-link-class="'page-link'"
-      :container-class="'pagination justify-content-center'"
-      :page-class="'page-item'"
-    ></paginate>
   </div>
 </template>
 <script>
@@ -162,9 +168,13 @@ export default {
     };
   },
   created() {
+    if (this.$store.state.userAuth === false) {
+      return this.$router.replace({ path: "/auth" });
+    }
     this.isLoaded = true;
     this.getOrderList();
   },
+
   computed: {
     pageCount: function() {
       if (!this.filter) {
@@ -236,7 +246,6 @@ export default {
             product_name: "",
             product_art: ""
           });
-          console.log(item);
         }
       });
       return orders;

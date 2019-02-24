@@ -8,8 +8,15 @@ export default new Vuex.Store({
     host: "http://185.25.117.32:3012",
     //host: "http://localhost:3012",
     npToken: "d785ec75486a52d139578b925614e87a",
+    modnaCastaToken: "i5ybmm8zlp9jdefu7k7j6420gutlrz6iemfynhfm",
+    wc: {
+      username: "makoviysvetlana@gmail.com",
+      password: "tiramicy"
+    },
     role: 1,
-    userAuth: true
+    isLoaded: false,
+    userAuth: true,
+    pageIsLoad: false
   },
   mutations: {
     setRoleUser(state, value) {

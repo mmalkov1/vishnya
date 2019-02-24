@@ -1,101 +1,114 @@
 <template>
-  <div id="table" class="container" v-if=" this.$store.state.userAuth === true">
-    <loader v-if="this.isLoaded === true"></loader>
-    <div class="row col-12 mt-3 justify-content-between">
-      <div class="form-group col-4 row">
-        <div>
-          <button class="btn btn-success" @click="$emit('addProduct')">Добавить</button>
-        </div>
-        <select
-          v-model="priceType.count"
-          class="custom-select col-5 ml-auto"
-          v-if=" this.$store.state.role === 1"
-        >
-          <option v-for="type in priceTypes" :key="type.id" :value="type.id">{{type.price_name}}</option>
-        </select>
-      </div>
-      <div class="form-group col-4 row">
-        <label for="find" class="col-3 align-self-center">Поиск</label>
-        <input v-model="filter" class="form-control col-7" name="find">
-      </div>
-      <div class="form-group col-4 row" v-if="this.$store.state.role === 1">
-        <datepicker
-          :format="format"
-          :language="ru"
-          input-class="form-control col-12"
-          class="col-5"
-          v-model="startDate"
-          :bootstrap-styling="true"
-          :monday-first="true"
-        ></datepicker>
-        <datepicker
-          :format="format"
-          :language="ru"
-          input-class="form-control col-12"
-          class="col-5"
-          v-model="endDate"
-          :bootstrap-styling="true"
-          :monday-first="true"
-        ></datepicker>
-        <div class="col-2">
-          <download-excel
-            :fetch="getLastOrderDate()"
-            :data="productData"
-            :fields="exportXlsFields"
-            class="btn btn-primary btn-sm"
+  <div>
+    <appHeader></appHeader>
+    <div id="table" class="container" v-if=" this.$store.state.userAuth === true">
+      <loader v-if="this.isLoaded === true"></loader>
+      <div class="row col-12 mt-3 justify-content-between">
+        <div class="form-group col-4 row">
+          <div>
+            <router-link class="btn btn-success" to="/products/add">Добавить</router-link>
+          </div>
+          <select
+            v-model="priceType.count"
+            class="custom-select col-5 ml-auto"
+            v-if=" this.$store.state.role === 1"
           >
-            <i class="fas fa-cloud-download-alt"></i>
-          </download-excel>
+            <option v-for="type in priceTypes" :key="type.id" :value="type.id">{{type.price_name}}</option>
+          </select>
+        </div>
+        <div class="form-group col-4 row">
+          <label for="find" class="col-3 align-self-center">Поиск</label>
+          <input v-model="filter" class="form-control col-7" name="find">
+        </div>
+        <div class="form-group col-4 row" v-if="this.$store.state.role === 1">
+          <datepicker
+            :format="format"
+            :language="ru"
+            input-class="form-control col-12"
+            class="col-4"
+            v-model="startDate"
+            :bootstrap-styling="true"
+            :monday-first="true"
+          ></datepicker>
+          <datepicker
+            :format="format"
+            :language="ru"
+            input-class="form-control col-12"
+            class="col-4"
+            v-model="endDate"
+            :bootstrap-styling="true"
+            :monday-first="true"
+          ></datepicker>
+          <div class="col-2">
+            <download-excel
+              :data="productData"
+              :fields="exportXlsFields"
+              class="btn btn-primary btn-sm"
+            >
+              <i class="fas fa-cloud-download-alt"></i>
+            </download-excel>
+          </div>
+          <div class="col-2">
+            <button type="button" class="btn btn-primary btn-sm">
+              <i class="fas fa-sync" @click="updateAllProductsInModnaKasta()"></i>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <table class="table table-striped">
-      <thead>
-        <tr @click="sortBy">
-          <th id="id">id</th>
-          <th id="product_art">Артикул</th>
-          <th id="product_name">Название</th>
-          <th id="acc_category">Группа товара</th>
-          <th id="product_quantity">На остатке</th>
-          <th id="acc_product_prices">Цена</th>
-          <th>Примечание</th>
-          <th>Опции</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="product in orderedProducts" :key="'product' + product.id">
-          <td>{{ product.id }}</td>
-          <td>{{ product.product_art }}</td>
-          <td>{{ product.product_name }}</td>
-          <td>{{ categoryName(product.acc_category) }}</td>
-          <td>{{ getProductQuantity(product.id)}} ({{ getProductReserved(product.id) }})</td>
-          <td>{{ priceCount(product.acc_product_prices)}}</td>
-          <td>{{ product.product_descr }}</td>
-          <td>
-            <button class="btn btn-primary" @click="$emit('editProduct', product.id)">
-              <i class="far fa-edit"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <paginate
-      v-model="page"
-      :page-count="this.pageCount"
-      :page-range="3"
-      :margin-pages="2"
-      :prev-text="'Назад'"
-      :prev-class="'page-item'"
-      :click-handler="getPage"
-      :next-text="'Вперед'"
-      :next-class="'page-item'"
-      :prev-link-class="'page-link'"
-      :next-link-class="'page-link'"
-      :page-link-class="'page-link'"
-      :container-class="'pagination justify-content-center'"
-      :page-class="'page-item'"
-    ></paginate>
+      <table class="table table-striped">
+        <thead>
+          <tr @click="sortBy">
+            <th id="id">id</th>
+            <th id="product_art">Артикул</th>
+            <th id="product_name">Название</th>
+            <th id>Фото</th>
+            <th id="product_quantity">На остатке</th>
+            <th id="acc_product_prices">Цена</th>
+            <th>Примечание</th>
+            <th>Опции</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in orderedProducts" :key="'product' + product.id">
+            <td>{{ product.id }}</td>
+            <td>{{ product.product_art }}</td>
+            <td>{{ product.product_name }}</td>
+            <!-- <td>{{ categoryName(product.acc_category) }}</td> -->
+            <td>
+              <img :src="product.product_photo" class="img-product">
+            </td>
+            <td>{{ getProductQuantity(product.id)}} ({{ getProductReserved(product.id) }})</td>
+            <td>{{ priceCount(product.acc_product_prices)}}</td>
+            <td>{{ product.product_descr }}</td>
+            <td>
+              <router-link
+                class="btn btn-outline-dark"
+                :to="{name: 'products', params: { id: product.id}}"
+              >
+                <i class="far fa-edit"></i>
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <paginate
+        v-model="page"
+        :page-count="this.pageCount"
+        :page-range="3"
+        :margin-pages="2"
+        :prev-text="'Назад'"
+        :prev-class="'page-item'"
+        :click-handler="getPage"
+        :next-text="'Вперед'"
+        :next-class="'page-item'"
+        :prev-link-class="'page-link'"
+        :next-link-class="'page-link'"
+        :page-link-class="'page-link'"
+        :container-class="'pagination justify-content-center'"
+        :page-class="'page-item'"
+      ></paginate>
+    </div>
   </div>
 </template>
 
@@ -106,6 +119,8 @@ import "babel-polyfill";
 import moment from "moment";
 import { setTimeout } from "timers";
 import { ru } from "vuejs-datepicker/dist/locale";
+import * as products_json from "./../assets/products.json";
+import { updateProductsInModnaKasta } from "../modules/modnaKasta/operationsModnaKasta.js";
 
 export default {
   name: "productList",
@@ -139,7 +154,7 @@ export default {
         "Цена закупки": {
           field: "acc_product_prices",
           callback: value => {
-            return value.find(el => el.accPriceTypeId === 1).price_count;
+            return value.find(el => el.accPriceTypeId == 1).price_count;
           }
         },
         "Количество на остатке": {
@@ -275,6 +290,7 @@ export default {
       }
     };
   },
+
   computed: {
     orderedProducts: function() {
       if (!this.filter) {
@@ -319,17 +335,30 @@ export default {
     }
   },
   created() {
+    if (this.$store.state.userAuth === false) {
+      return this.$router.replace({ path: "/auth" });
+    }
     this.isLoaded = true;
     this.getAnswer();
     this.getPriceType();
   },
 
   methods: {
-    getLastOrderDate: function() {
+    updateAllProductsInModnaKasta() {
+      this.isLoaded = true;
+      const arrayOfIds = [];
+      this.productData.map(el => arrayOfIds.push(el.id));
+      updateProductsInModnaKasta(arrayOfIds, this.orderProducts)
+        .then(() => (this.isLoaded = false))
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    getLastOrderDate() {
       axios
         .get(`${this.$store.state.host}/orderproducts`)
         .then(res => {
-          this.orderProducts = res.data;
+          return (this.orderProducts = res.data);
         })
         .catch(err => console.log(err));
     },
@@ -380,7 +409,7 @@ export default {
           el.product_reserved = 0;
         });
         await this.productData.map(el => (el.lastSaleDate = ""));
-        //await this.getLastOrderDate();
+        await this.getLastOrderDate();
         this.isLoaded = false;
       } catch (error) {
         console.log(error);
@@ -428,5 +457,10 @@ th {
 }
 .btn-primary a {
   color: white;
+}
+.img-product {
+  display: block;
+  width: 50px;
+  height: auto;
 }
 </style>

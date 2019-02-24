@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "В наличии",
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 2,
+    "name": "Отсутствует",
+    "createdAt": null,
+    "updatedAt": null
+  }
+]

@@ -178,6 +178,9 @@ export default {
     };
   },
   created() {
+    if (this.$store.state.userAuth === false) {
+      return this.$router.replace({ path: "/auth" });
+    }
     this.getStatus();
     this.getCategory();
     this.getPriceType();

@@ -1,0 +1,128 @@
+[
+  {
+    "id": 1,
+    "category_name": "Главная",
+    "parent_id": 0,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596131,
+    "category_name": "Женский   Кожаный рюкзак",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596134,
+    "category_name": "Женский Повседневный рюкзак",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596136,
+    "category_name": "Женские сумки Из натуральной кожи",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596171,
+    "category_name": "Женские  Повседневные сумки",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596173,
+    "category_name": "Женские Вечерние, мини, клатчи",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596192,
+    "category_name": "Мужские Тибетские браслеты из бусин",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596193,
+    "category_name": "Мужские Кожаные браслеты",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596195,
+    "category_name": "Мужские Браслеты на любой вкус",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596197,
+    "category_name": "Мужские Наборы",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596200,
+    "category_name": "Цепочки, кулоны, подвески",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596201,
+    "category_name": "Женский Браслеты",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596202,
+    "category_name": "Женкские Серьги",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596203,
+    "category_name": "Женские  колье",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24596206,
+    "category_name": "Женские  Часы",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24987962,
+    "category_name": "Мужские сумки из натуральной кожи",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 24987967,
+    "category_name": "Мужские  Рюкзаки",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 27139923,
+    "category_name": "Женские кольца Кольца",
+    "parent_id": 1,
+    "createdAt": null,
+    "updatedAt": null
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "login": "VIP123",
+    "password": "$2b$10$Ajz1AW/D3vxSCgM5/9R83ueGg/zANjYFlVy4MLa7eiD4C2f01hTOm",
+    "token": null,
+    "role": 1,
+    "createdAt": "2018-10-30 21:57:03",
+    "updatedAt": "2018-10-30 21:57:03"
+  },
+  {
+    "id": 4,
+    "login": "admin",
+    "password": "$2b$10$1r1LC8.EOPRerCKq8jWU..CtRSd5SMHO6eqZdSUFyZv2PVl3fDWua",
+    "token": null,
+    "role": 1,
+    "createdAt": "2018-10-31 21:56:13",
+    "updatedAt": "2018-10-31 21:56:13"
+  },
+  {
+    "id": 5,
+    "login": "manager",
+    "password": "$2b$10$Inl2BXVm/qolrup5fAeyKesJmdUv0KkwpD9o1VWTjBVtuw2sW950q",
+    "token": null,
+    "role": 2,
+    "createdAt": "2018-10-31 21:56:34",
+    "updatedAt": "2018-10-31 21:56:34"
+  }
+]

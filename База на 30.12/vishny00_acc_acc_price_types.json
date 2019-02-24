@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "price_name": "Закупочная",
+    "createdAt": null,
+    "updatedAt": null
+  },
+  {
+    "id": 2,
+    "price_name": "Розничная",
+    "createdAt": null,
+    "updatedAt": null
+  }
+]

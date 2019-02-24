@@ -1,15 +1,14 @@
 <template>
   <div class="login-page">
     <span :class="{'alert': isActive, 'alert-danger' : isActive}">{{this.error}}</span>
-  <div class="form">
-    
-    <form class="login-form">
-      <input type="text" placeholder="username" v-model="username"/>
-      <input type="password" placeholder="password" v-model="password"/>
-      <button @click="this.getToken">Войти</button>
-    </form>
+    <div class="form">
+      <form class="login-form">
+        <input type="text" placeholder="username" v-model="username">
+        <input type="password" placeholder="password" v-model="password">
+        <button @click="this.getToken">Войти</button>
+      </form>
+    </div>
   </div>
-</div>
 </template>
 <script>
 import axios from "axios";
@@ -19,18 +18,14 @@ export default {
   name: "editOrder",
   data() {
     return {
-      username: '',
-      password: '',
-      error: '',
+      username: "",
+      password: "",
+      error: "",
       isActive: false
-    }
+    };
   },
-  watch: {
-    
-  },
-  mounted: function() {
-   
-  },
+  watch: {},
+  mounted: function() {},
   methods: {
     getToken(e) {
       e.preventDefault();
@@ -42,29 +37,29 @@ export default {
           password: this.password
         }
       })
-        .then(res=>{
-          axios.get(`${this.$store.state.host}/users/user`, {
-            headers: {
-              'x-auth-token': res.data.token 
-            }
-          })
-            .then(user=>{
-              this.$store.commit('setRoleUser', user.data.role);
-              this.$store.commit('setAuthUser', true)
-              this.$emit('products')
+        .then(res => {
+          axios
+            .get(`${this.$store.state.host}/users/user`, {
+              headers: {
+                "x-auth-token": res.data.token
+              }
             })
-            .catch(err=>console.log(err))
+            .then(user => {
+              this.$store.commit("setRoleUser", user.data.role);
+              this.$store.commit("setAuthUser", true);
+              this.$router.push({ path: "/products" });
+            })
+            .catch(err => console.log(err));
         })
-        .catch(err=>{
-          this.error = 'Неправильный логин или пароль';
-          this.isActive = true
-        })
+        .catch(err => {
+          this.error = "Неправильный логин или пароль";
+          this.isActive = true;
+        });
     }
   }
 };
 </script>
 <style scoped>
-
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
 .login-page {

@@ -2,34 +2,55 @@
   <h1>Test</h1>
 </template>
 <script>
-import axios from 'axios'
-import VueResource from 'vue-resource'
-import moment from 'moment'
+import axios from "axios";
+import VueResource from "vue-resource";
+import moment from "moment";
 
 export default {
-  name: 'imOrders',
-  data () {
+  name: "imOrders",
+  data() {
     return {
       orders: []
-    }
+    };
   },
-  created () {
-    this.getImOrders();
+  created() {
+    //this.getImOrders();
   },
-  methods : {
-    getImOrders () {
+  methods: {
+    getImOrders() {
       let option = {
-        headers : {
-          'Authorization':'Bearer 287a0d6efcece7188675832cc20e57172743b28a'
+        headers: {},
+        auth: {
+          username: "makoviysvetlana@gmail.com",
+          password: "tiramicy"
         }
-      }
-      axios.get(`https://my.prom.ua/api/v1/orders/list?limit=100`, option)
-        .then(res=>console.log(res))
-        .catch(err=>console.log(err))
+      };
+      console.log("Start response...");
+      let a = 0;
+      axios
+        .get(
+          `https://vishnya.org.ua/wp-json/wc/v2/products?per_page=100&page=10`,
+          option
+        )
+        .then(res => {
+          res.data.map(el => {
+            axios(`${this.$store.state.host}/products/${el.sku}`, {
+              method: "PUT",
+              data: {
+                product_photo: el.images[0].src
+              }
+            })
+              .then(rslt => {
+                a++;
+                console.log(`${a}. Product ${el.sku} was updated...`);
+              })
+              .catch(error => console.log(error));
+          });
+        })
+        .catch(err => console.log(err));
     }
   }
-}
+};
 </script>
 <style>
-
 </style>

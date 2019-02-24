@@ -171,6 +171,26 @@ let Products = db.define("acc_products", {
   product_photo: {
     type: Sequelize.STRING,
     allowNull: true
+  },
+  wc_id: {
+    type: Sequelize.INTEGER,
+    allowNull: true
+  },
+  brand: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  color: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  size: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  isProductModnaKasta: {
+    type: Sequelize.DOUBLE,
+    allowNull: true
   }
 });
 

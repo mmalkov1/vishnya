@@ -45,7 +45,6 @@ router.get("/:id", function(req, res, next) {
 });
 
 router.put("/productid", function(req, res, next) {
-  const Op = Sequelize.Op;
   OrderProducts.findAll({
     where: {
       product_id: req.body
@@ -76,16 +75,17 @@ router.put("/id/:type/:id", function(req, res, next) {
         }
       ]
     }
-  });
-  for (let item of req.body) {
-    console.log(req.body);
-    OrderProducts.create(item)
-      .then(() =>
-        console.log(
-          `Product ${item.product_id} of Order ${item.order_id} is updated!!!`
+  }).then(() => {
+    for (let item of req.body) {
+      console.log(req.body);
+      OrderProducts.create(item)
+        .then(() =>
+          console.log(
+            `Product ${item.product_id} of Order ${item.order_id} is updated!!!`
+          )
         )
-      )
-      .catch(err => console.log(err));
-  }
-  res.send(true);
+        .catch(err => console.log(err));
+    }
+    res.send(true);
+  });
 });
